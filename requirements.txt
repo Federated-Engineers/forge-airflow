@@ -1,0 +1,3 @@
+awswrangler==3.14.0
+Faker==39.0.0
+boto3==1.42.34
