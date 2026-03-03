@@ -30,7 +30,7 @@ jobs:
       - name: Build, tag, and push docker image to Amazon ECR
         env:
           REGISTRY: 049417293525.dkr.ecr.eu-central-1.amazonaws.com
-          REPOSITORY: elite-airflow
+          REPOSITORY: forge-airflow
           IMAGE_TAG: version-${{ github.sha }}
         run: |
           docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .

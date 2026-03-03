@@ -5,15 +5,12 @@ import pandas as pd
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 
-DAG_ID = 'latest-demo'
+DAG_ID = 'forge-example-dag'
 
 
 # simple task to test full flow
-def demo():
-    wr.s3.to_parquet(
-        df=pd.DataFrame({'col': [1, 2, 5]}),
-        path='s3://poc-bucket-oremeta/prefix/my_file.parquet')
-    return "Data written to s3."
+def demo():  
+    return "Testing this DAG"
 
 
 default_args = {
@@ -36,8 +33,8 @@ dag = DAG(
 )
 
 
-get_latest_report_file_task = PythonOperator(
+test_dag = PythonOperator(
     dag=dag,
-    task_id='get_latest_report_file',
+    task_id='test_dag',
     python_callable=demo
 )
