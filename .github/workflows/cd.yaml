@@ -51,15 +51,15 @@ jobs:
           cd kubernetes-deployments/applications/production-values/
           
           if [[ "$OSTYPE" == "darwin"* ]]; then
-            sed -i '' "s|tag: version-.*|tag: version-${{ github.sha }}|g" elite-airflow-values.yaml
+            sed -i '' "s|tag: version-.*|tag: version-${{ github.sha }}|g" forge-airflow-values.yaml
           else
-            sed -i "s|tag: version-.*|tag: version-${{ github.sha }}|g" elite-airflow-values.yaml
+            sed -i "s|tag: version-.*|tag: version-${{ github.sha }}|g" forge-airflow-values.yaml
           fi
             
           # Commit changes
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
-          git add elite-airflow-values.yaml
+          git add forge-airflow-values.yaml
           git commit -m "Update image to version-${{ github.sha }}"
           
           # Push
