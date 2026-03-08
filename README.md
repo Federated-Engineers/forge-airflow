@@ -44,3 +44,15 @@ Defines the production dependencies required for DAG execution. Add any new libr
 
 `requirements-dev.txt` --->
 Contains dependencies required only for CI/CD processes, such as testing and validation tools.
+
+
+### FOR LOCAL DEVELOPMENT
+
+- Clone the repository and navigate to the repository directory.
+- Create your virtual environment by running `python3 -m venv venv` on your IDE.
+- Activate the virtual environment by running `source venv/bin/activate`.
+- Run `pip install -r requirements-dev.txt` to install the packages required to ensure your code pass the CI pipeline.
+- Start airflow by running `docker compose up -d --build`
+  - This will use the Dockerfile in the repository to build the image with the dependencies defined in the `requirements.txt`.
+  - The airflow services are started using the image built above.
+- Visit `localhost:8080` to view the airflow UI.
