@@ -58,7 +58,7 @@ If your Airflow DAG require talking to AWS and you would like to test your DAG l
 - Install AWS-VAULT tool [here](https://github.com/99designs/aws-vault?tab=readme-ov-file#installing)
 - After the installation, please confirm the installation by running `aws-vault --version` on your terminal.
 - After the confirmation, run `aws-vault add forge-airflow-local`.
-  - This will prompt you for your `aws access key` and `aws secret key`.
+  - This will prompt you for your `aws access key`, `aws secret key` and `keychain password`.
 - After that, start airflow by running `aws-vault exec forge-airflow-local -- docker compose up -d --build` 
   - This will start airflow and inject a temporary Access and Secret key as an environment variable in your airflow service containers.
   - You can confirm the environemnt variable defined [HERE](https://github.com/Federated-Engineers/forge-airflow/blob/main/docker-compose.yaml#L64-L67) inside any of your airflow service container.
