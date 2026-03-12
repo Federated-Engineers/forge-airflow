@@ -53,8 +53,8 @@ Contains dependencies required only for CI/CD processes, such as testing and val
 - Activate the virtual environment by running `source venv/bin/activate`.
 - Run `pip install -r requirements-dev.txt` to install the packages required to work locally to ensure your code pass the CI pipeline.
 
-### AWS CREDENTIALS INJECTION TO DOCKER CONTAINER
-If your Airflow require talking to AWS and you would like to test your DAG locally to ensure it can communicate with the require resource before you open a PR.
+### START AIRFLOW WITH AWS CREDENTIALS INJECTION TO DOCKER CONTAINER
+If your Airflow DAG require talking to AWS and you would like to test your DAG locally to ensure it can communicate with the require AWS resource before you open a PR.
 - Install AWS-VAULT tool [here](https://github.com/99designs/aws-vault?tab=readme-ov-file#installing)
 - After the installation, please confirm the installation by running `aws-vault --version` on your terminal.
 - After the confirmation, run `aws-vault add forge-airflow-local`.
