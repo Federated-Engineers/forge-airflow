@@ -61,7 +61,7 @@ If your Airflow require talking to AWS and you would like to test your DAG local
   - This will prompt you for your `aws access key` and `aws secret key`.
 - After that, start airflow by running `aws-vault exec forge-airflow-local -- docker compose up -d --build` 
   - This will start airflow and inject a temporary Access and Secret key as an environment variable in your airflow service containers.
-  - You can confirm the environemnt variable defined HERE inside any of your airflow service container.
+  - You can confirm the environemnt variable defined [HERE](https://github.com/Federated-Engineers/forge-airflow/blob/main/docker-compose.yaml#L64-L67) inside any of your airflow service container.
   - This will also use the Dockerfile in the repository to build the image with the dependencies defined in the `requirements.txt`.
   - The airflow services are started using the image built above.
 - Visit `localhost:8080` to view the airflow UI.
