@@ -1,9 +1,11 @@
+import json
+import os
 from typing import Any
-import json, os
+
+import boto3
 import gspread
 import pandas as pd
 import awswrangler as wr
-import boto3
 from airflow.sdk import Variable
 
 
