@@ -1,10 +1,8 @@
 import datetime
 from typing import Any
-
 from airflow.sdk import DAG
 from airflow.providers.standard.operators.python import PythonOperator
-
-from business_logic.glaciair_logic_copy import load_gsheets_s3_csv
+from business_logic.glaciair_logic import load_gsheets_s3_csv
 
 ################################## Airflow Variables used in DAG ##################################
 # GLACIAIR_S3_PATH
@@ -17,9 +15,9 @@ DEFAULT_ARGS: dict[str, Any] = {
 	"owner": "Federated-Engineers",
 	"depends_on_past": False,
 	"start_date": datetime.datetime(2026, 1, 1),
-	"retries": 0,
-	"retry_delay": datetime.timedelta(minutes=5),
-	"execution_timeout": datetime.timedelta(minutes=30),
+	"retries": 3,
+	"retry_delay": datetime.timedelta(minutes=1),
+	"execution_timeout": datetime.timedelta(minutes=10),
 }
 
 with DAG(
