@@ -1,3 +1,6 @@
+# Test push for Afeez - Verifying Atlantis CI/CD pipeline
+# Collaborating with Choice on the Kinetic Motors Project
+
 import datetime
 
 import awswrangler as wr
