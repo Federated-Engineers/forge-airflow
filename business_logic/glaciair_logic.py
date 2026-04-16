@@ -74,4 +74,4 @@ def load_gsheets_s3_csv(report_date):
             index=False
         )
 
-        print("Data written to s3 successfully!!")
+        print("Data written to s3 bucket successfully!!")
