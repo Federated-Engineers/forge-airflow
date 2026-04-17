@@ -1,10 +1,10 @@
 import json
 from typing import Any
 
+import awswrangler as wr
 import boto3
 import gspread
 import pandas as pd
-import awswrangler as wr
 from airflow.sdk import Variable
 
 
@@ -22,18 +22,21 @@ def _validate_variables() -> dict[str, Any]:
     Function to validate airflow variables
     '''
     ssm_parameter_name: str = Variable.get("GLACIAIR_SSM_PARAMETER")
-    s3_path: str = Variable.get("GLACIAIR_S3_PATH") # bucket_name/prefix
+    s3_path: str = Variable.get("GLACIAIR_S3_PATH")  # bucket_name/prefix
 
-    # This expects a JSON list object in the Airflow Variable. For Example ["Sheet1", "Sheet3", "Sheet6"]
-    spreadsheet_names_airflow_var_name: str = "GLACIAIR_SPREADSHEETS"
-    spreadsheet_names: list[str] = Variable.get(spreadsheet_names_airflow_var_name, deserialize_json=True)
+    # This expects a JSON list object in the Airflow Variable.
+    spreadsheet_var_name: str = "GLACIAIR_SPREADSHEETS"
+    spreadsheet_names: list[str] = Variable.get(
+        spreadsheet_var_name,
+        deserialize_json=True)
     if not isinstance(spreadsheet_names, list):
-        raise ValueError(f"Airflow variable {spreadsheet_names_airflow_var_name} must be a JSON List.")
+        raise ValueError(
+            f"Variable {spreadsheet_var_name} must be a JSON List.")
     else:
         for sheet_name in spreadsheet_names:
             if not isinstance(sheet_name, str):
-                raise ValueError(f"Sheet names defined in {spreadsheet_names_airflow_var_name}, must be a string.")
-            
+                raise ValueError(
+                    f"Sheet in {spreadsheet_var_name}, must be a string.")
     return {
         "ssm_paramater_name": ssm_parameter_name,
         "spreadsheet_names": spreadsheet_names,
@@ -59,8 +62,7 @@ def load_gsheets_s3_csv(report_date):
     # open google sheets by name
     for gsheet_name in variables["spreadsheet_names"]:
         spreadsheet = gc.open(gsheet_name)
-        
-        # selecting worksheet by its title. All the spreadsheets has just one sheet named sheet1
+        # selecting worksheet by its title sheet1
         worksheet = spreadsheet.worksheet("Sheet1")
 
         # convert google sheet data to pandas dataframe
@@ -69,7 +71,7 @@ def load_gsheets_s3_csv(report_date):
         s3_prefix = gsheet_name.lower().replace(' ', '_')
         wr.s3.to_csv(
             df=sheet_df,
-            path=f's3://{s3_path}/glaciair_logistic/{report_date}/{s3_prefix}.csv',
+            path=f's3://{s3_path}/glaciair/{report_date}/{s3_prefix}.csv',
             index=False
         )
 
