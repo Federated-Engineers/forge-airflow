@@ -1,6 +1,8 @@
-import datetime
+from datetime import datetime
+
 from airflow import DAG
 from airflow.operators.python import PythonOperator
+
 DAG_ID = "forge-example-dag"
 
 
