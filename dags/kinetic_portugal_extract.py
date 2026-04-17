@@ -8,7 +8,7 @@ import pandas as pd
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 
-DAG_ID = 'forge-example-dag'
+DAG_ID = 'Kinetic-Portugal-Extract-DAG'
 
 
 # simple task to test full flow
