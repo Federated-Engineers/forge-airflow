@@ -43,7 +43,7 @@ def get_google_credentials() -> Dict:
     return json.loads(response["Parameter"]["Value"])
 
 
-def get_asset_repair_sheet()-> gspread.Client:
+def get_asset_repair_sheet() -> gspread.Client:
     creds = Credentials.from_service_account_info(
         get_google_credentials(), scopes=SCOPES
     )
