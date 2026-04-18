@@ -1,0 +1,34 @@
+from datetime import datetime, timedelta
+from airflow import DAG
+from airflow.models import Variable
+from airflow.providers.standard.operators.python import PythonOperator
+from business_logic.kinetic_motors.extract_load import _extract_load_portugal
+from business_logic.kinetic_motors.config import config
+
+spreadsheet_id = config["spreadsheet_id"]
+sheetname = config["sheetname"]
+
+default_args = {
+    "owner": "Federated-Engineers",
+    'depends_on_past': False,
+    "start_date": datetime(2026, 4, 18),
+    "retries": 2,
+    "retry_delay": timedelta(minutes=5),
+}
+
+with DAG(
+    dag_id="km_portugal_egress",
+    default_args=default_args,
+    schedule="30 7 * * *",
+    description="Extract Portugal data from S3 and push to Google Sheets",
+    catchup=False,
+    tags=["km", "egress"],
+) as dag:
+    extract_load_portugal = PythonOperator(
+        task_id="extract_load_to_sheet",
+        python_callable=_extract_load_portugal,
+        op_kwargs={
+            "spreadsheet_id": spreadsheet_id,
+            "sheetname": sheetname,
+        },
+    )
