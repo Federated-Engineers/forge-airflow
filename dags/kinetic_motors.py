@@ -17,12 +17,11 @@ default_args = {
 }
 
 with DAG(
-    dag_id="km_portugal_egress",
+    dag_id="kinetic_motors_daily",
     default_args=default_args,
     schedule="30 7 * * *",
     description="Extract Portugal data from S3 and push to Google Sheets",
-    catchup=False,
-    tags=["km", "egress"],
+    catchup=False
 ) as dag:
     extract_load_portugal = PythonOperator(
         task_id="extract_load_to_sheet",
