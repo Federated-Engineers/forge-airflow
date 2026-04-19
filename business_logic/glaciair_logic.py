@@ -9,20 +9,27 @@ from airflow.sdk import Variable
 
 
 def _get_ssm_paramater(parameter_name: str):
-    '''
-    Function to get SSM parameter using boto3
-    '''
+    """
+    Retrieve a parameter from AWS Systems Manager (SSM) Parameter Store.
+
+    Args:
+        parameter_name (str): The name of the SSM parameter to retrieve.
+        
+    Returns:
+        dict: The response from SSM containing the parameter value and metadata.
+    """
     session = boto3.Session()
     ssm = session.client("ssm")
     return ssm.get_parameter(Name=parameter_name)
 
 
 def _validate_variables() -> dict[str, Any]:
-    '''
-    Function to validate airflow variables
-    '''
-    ssm_parameter_name: str = Variable.get("GLACIAIR_SSM_PARAMETER")
-    s3_path: str = Variable.get("GLACIAIR_S3_PATH")  # bucket_name/prefix
+    """
+    Retrieve and Validate the required Airflow Variables for the Glaciair data pipeline.
+
+    Returns:
+        dict[str, Any]: A dictionary containing the validated variables.
+    """
 
     # This expects a JSON list object in the Airflow Variable.
     spreadsheet_var_name: str = "GLACIAIR_SPREADSHEETS"
