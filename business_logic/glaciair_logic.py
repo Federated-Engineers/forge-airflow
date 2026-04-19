@@ -14,9 +14,9 @@ def _get_ssm_paramater(parameter_name: str):
 
     Args:
         parameter_name (str): The name of the SSM parameter to retrieve.
-        
     Returns:
-        dict: The response from SSM containing the parameter value and metadata.
+        dict: The response from SSM containing the parameter
+                value and metadata.
     """
     session = boto3.Session()
     ssm = session.client("ssm")
@@ -25,7 +25,8 @@ def _get_ssm_paramater(parameter_name: str):
 
 def _validate_variables() -> dict[str, Any]:
     """
-    Retrieve and Validate the required Airflow Variables for the Glaciair data pipeline.
+    Retrieve and Validate the required Airflow Variables for \
+        the Glaciair data pipeline.
 
     Returns:
         dict[str, Any]: A dictionary containing the validated variables.
@@ -36,15 +37,16 @@ def _validate_variables() -> dict[str, Any]:
     s3_path: str = glaciair_variables.get("s3_path", "")  # bucket_name/prefix
 
     # This expects a JSON list object in the Airflow Variable.
-    spreadsheet_names: list[str] = glaciair_variables.get("spreadsheet_names", [])
+    spreadsheet_names: list[str] = glaciair_variables.get(
+        "spreadsheet_names",
+        []
+    )
     if not isinstance(spreadsheet_names, list):
-        raise ValueError(
-            f"Spreadsheet names must be a JSON List.")
+        raise ValueError("Spreadsheet names must be a JSON List.")
     else:
         for sheet_name in spreadsheet_names:
             if not isinstance(sheet_name, str):
-                raise ValueError(
-                    f"Sheet names must be a string.")
+                raise ValueError("Sheet names must be a string.")
     return {
         "ssm_paramater_name": ssm_parameter_name,
         "spreadsheet_names": spreadsheet_names,
