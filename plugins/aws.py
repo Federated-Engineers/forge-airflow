@@ -8,7 +8,8 @@ from google.oauth2.service_account import Credentials
 
 def retrieve_google_credentials() -> Dict:
     """
-    Retrieve Google service account credentials from AWS Systems Manager Parameter Store.
+    Retrieve Google service account credentials from
+    AWS Systems Manager Parameter Store.
 
     Returns:
         Dict: A dictionary containing the Google service account credentials
@@ -23,11 +24,8 @@ def retrieve_google_credentials() -> Dict:
 
 def authenticate_google_sheet(scopes: List) -> gspread.Client:
     """
-    Authenticate with Google Sheets API and return an authorised gspread client.
-
-    Fetches Google service account credentials via `retrieve_google_credentials()`,
-    constructs a scoped `Credentials` object using the module-level scopes,
-    and authorises a gspread client for interacting with Google Sheets.
+    Authenticate with Google Sheets API and return an
+    authorised gspread client.
 
     Returns:
         gspread.Client: An authorised gspread client instance
