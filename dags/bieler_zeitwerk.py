@@ -1,5 +1,4 @@
 from airflow.sdk import dag, task
-from airflow.sdk.definitions.context import get_current_context
 from pendulum import datetime
 
 from business_logic.bieler_zeitwerk.pipeline import run_pipeline
@@ -9,15 +8,14 @@ from business_logic.bieler_zeitwerk.pipeline import run_pipeline
     dag_id="bieler_zeitwerk_asset_repair_data",
     start_date=datetime(2026, 4, 10),
     catchup=False,
-    schedule="@daily",
-    tags=["forge"],
+    schedule="0 6 * * *",
+    tags=["forge", "google sheets", "SFTP", "bieler zeitwerk"],
 )
 def process_asset_repair_data():
 
     @task()
     def _process_asset_repair_data():
-        context = get_current_context()
-        return run_pipeline(context)
+        return run_pipeline()
 
     _process_asset_repair_data()
 
