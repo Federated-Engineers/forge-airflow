@@ -1,4 +1,7 @@
+import json
+
 import gspread
+import json
 from google.oauth2.service_account import Credentials
 from get_parameter import param
 
@@ -6,7 +9,8 @@ from get_parameter import param
 def get_google_credentials():
     """google service account credentials"""
 
-    creds_dict = param("/production/google-service-account/credentials")
+    creds_str = param("/production/google-service-account/credentials")
+    creds_dict = json.loads(creds_str)
     scopes = ["https://www.googleapis.com/auth/spreadsheets",
               "https://www.googleapis.com/auth/drive"]
 
