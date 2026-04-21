@@ -19,7 +19,7 @@ DEFAULT_ARGS: dict[str, Any] = {
 with DAG(
     dag_id=DAG_ID,
     default_args=DEFAULT_ARGS,
-    schedule="@daily",
+    schedule="0 5 * * *",  # Everyday at 05:00
     max_active_runs=1,
     catchup=False,
     tags=["forge", "data-sync", "glaciair"],
