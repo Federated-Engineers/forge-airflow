@@ -1,10 +1,10 @@
-import os
 import logging
+import os
 
+import awswrangler as wr
 import boto3
 import gspread
 import pandas as pd
-import awswrangler as wr
 
 logger = logging.getLogger(__name__)
 

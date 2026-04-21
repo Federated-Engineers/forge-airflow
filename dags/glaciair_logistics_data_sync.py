@@ -6,7 +6,6 @@ from airflow.sdk import DAG
 
 from business_logic.glaciair_logic import sync_glaciair_gsheets_to_s3
 
-
 DAG_ID: str = "glaciair-logistics-data-sync"
 DEFAULT_ARGS: dict[str, Any] = {
     "owner": "Federated-Engineers",

@@ -2,13 +2,9 @@ import json
 import logging
 from typing import Any
 
-from business_logic.integrations import (
-    _get_ssm_paramater,
-    load_gsheet_to_s3
-)
-
 from airflow.sdk import Variable
 
+from business_logic.integrations import _get_ssm_paramater, load_gsheet_to_s3
 
 logger = logging.getLogger(__name__)
 
