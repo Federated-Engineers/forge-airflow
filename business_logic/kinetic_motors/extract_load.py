@@ -28,7 +28,13 @@ def write_df_to_sheet(df, spreadsheet_id, sheetname):
     """Appends data to google sheets"""
     google_cred = get_google_credentials()
     worksheet = google_cred.open_by_key(spreadsheet_id).worksheet(sheetname)
-    worksheet.append_rows(df.values.tolist())
+    first_row = worksheet.row_values(1)
+    if not first_row:
+        log.info("Sheet is empty, writing headers and data...")
+        worksheet.append_rows([df.columns.tolist()] + df.values.tolist())
+    else:
+        log.info("Sheet has data, appending rows only...")
+        worksheet.append_rows(df.values.tolist())
 
 
 def extract_load_portugal(spreadsheet_id, sheetname):
