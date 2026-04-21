@@ -1,5 +1,6 @@
 import json
 import logging
+import os
 from typing import Any
 
 from airflow.sdk import Variable
@@ -80,7 +81,10 @@ def sync_glaciair_gsheets_to_s3(report_date: str) -> None:
         load_gsheet_to_s3(
             gsheet_name=gsheet_name,
             s3_bucket=glacair_variables["s3_bucket"],
-            s3_prefix=glacair_variables["s3_prefix"],
+            s3_prefix=os.path.join(
+                glacair_variables["s3_prefix"],
+                report_date
+            ),
             service_credentials=json.loads(
                 google_service_cred["Parameter"]["Value"]
             ),
