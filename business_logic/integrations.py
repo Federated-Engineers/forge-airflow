@@ -5,7 +5,6 @@ import awswrangler as wr
 import boto3
 import gspread
 import pandas as pd
-from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
