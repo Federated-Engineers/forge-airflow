@@ -22,12 +22,12 @@ def _validate_variables() -> dict[str, Any]:
         deserialize_json=True
     )
 
-    ssm_parameter_name: str = glaciair_variables["ssm_parameter_name"]
-    s3_bucket: str = glaciair_variables["s3_bucket"]
-    s3_prefix: str = glaciair_variables["s3_prefix"]
+    ssm_parameter_name = glaciair_variables["ssm_parameter_name"]
+    s3_bucket = glaciair_variables["s3_bucket"]
+    s3_prefix = glaciair_variables["s3_prefix"]
 
     # This expects a JSON list object in the Airflow Variable.
-    spreadsheet_names: list[str] = glaciair_variables["spreadsheet_names"]
+    spreadsheet_names = glaciair_variables["spreadsheet_names"]
     if not isinstance(spreadsheet_names, list):
         raise ValueError("Spreadsheet names must be a JSON List.")
     else:
@@ -51,12 +51,12 @@ def sync_glaciair_gsheets_to_s3(report_date: str) -> None:
     """
 
     glacair_variables = _validate_variables()
-    num_airflow_variables: int = len(glacair_variables)
+    num_airflow_variables = len(glacair_variables)
     logger.info(
         f"Validated {num_airflow_variables} GlaciAir Airflow Variables"
     )
 
-    num_spreadsheets: int = len(glacair_variables["spreadsheet_names"])
+    num_spreadsheets = len(glacair_variables["spreadsheet_names"])
     logger.info(
         f"Found {num_spreadsheets} Google Sheets to sync."
     )
@@ -77,6 +77,8 @@ def sync_glaciair_gsheets_to_s3(report_date: str) -> None:
             f"Starting Glaciair GSheets to S3 Sync for Sheet: {gsheet_name!r}"
         )
 
+        # replace spaces between sheet name with underscore
+        gsheet_name = gsheet_name.replace(' ', '_')
         load_gsheet_to_s3(
             gsheet_name=gsheet_name,
             s3_bucket=glacair_variables["s3_bucket"],
