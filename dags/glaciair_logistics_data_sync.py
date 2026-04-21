@@ -1,13 +1,12 @@
 import datetime
-from typing import Any
 
 from airflow.providers.standard.operators.python import PythonOperator
 from airflow.sdk import DAG
 
 from business_logic.glaciair_logic import sync_glaciair_gsheets_to_s3
 
-DAG_ID: str = "glaciair-logistics-data-sync"
-DEFAULT_ARGS: dict[str, Any] = {
+DAG_ID = "glaciair-logistics-data-sync"
+DEFAULT_ARGS = {
     "owner": "Federated-Engineers",
     "depends_on_past": False,
     "start_date": datetime.datetime(2026, 1, 1),
@@ -26,6 +25,5 @@ with DAG(
 ):
     run_pipeline = PythonOperator(
         task_id="load_gsheet_to_s3",
-        python_callable=sync_glaciair_gsheets_to_s3,
-        op_kwargs={"report_date": "{{ ds }}"},
+        python_callable=sync_glaciair_gsheets_to_s3
     )
