@@ -43,13 +43,18 @@ def _validate_variables() -> dict[str, Any]:
     }
 
 
-def sync_glaciair_gsheets_to_s3(report_date: str) -> None:
+def sync_glaciair_gsheets_to_s3(**context: dict) -> None:
     """
     Main Task Function to Sync Glaciair Google Sheets Data to S3.
 
     Args:
-        report_date (str): The date for which the report is being generated.
+        **context (dict): For airflow to pass runtime variables
+        We will be needing logical_date from the variables
     """
+    # get dag run logical date from context
+    # the date will be used to partition report in s3
+    logical_date = context["logical_date"]
+    partition_date = logical_date.strftime("%Y-%m-%d")
 
     glacair_variables = _validate_variables()
     num_airflow_variables = len(glacair_variables)
@@ -85,7 +90,7 @@ def sync_glaciair_gsheets_to_s3(report_date: str) -> None:
             s3_bucket=glacair_variables["s3_bucket"],
             s3_prefix=os.path.join(
                 glacair_variables["s3_prefix"],
-                report_date
+                partition_date
             ),
             service_credentials=json.loads(
                 google_service_cred["Parameter"]["Value"]
