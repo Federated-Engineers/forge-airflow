@@ -1,26 +1,16 @@
 import json
+import logging
 from typing import Any
 
-import awswrangler as wr
-import boto3
-import gspread
-import pandas as pd
+from business_logic.integrations import (
+    _get_ssm_paramater,
+    load_gsheet_to_s3
+)
+
 from airflow.sdk import Variable
 
 
-def _get_ssm_paramater(parameter_name: str):
-    """
-    Retrieve a parameter from AWS Systems Manager (SSM) Parameter Store.
-
-    Args:
-        parameter_name (str): The name of the SSM parameter to retrieve.
-    Returns:
-        dict: The response from SSM containing the parameter
-                value and metadata.
-    """
-    session = boto3.Session()
-    ssm = session.client("ssm")
-    return ssm.get_parameter(Name=parameter_name)
+logger = logging.getLogger(__name__)
 
 
 def _validate_variables() -> dict[str, Any]:
@@ -31,10 +21,14 @@ def _validate_variables() -> dict[str, Any]:
     Returns:
         dict[str, Any]: A dictionary containing the validated variables.
     """
-    glaciair_variables = Variable.get("GLACI_AIR", deserialize_json=True)
+    glaciair_variables = Variable.get(
+        "GLACIAIR_LOGISTICS",
+        deserialize_json=True
+    )
 
     ssm_parameter_name: str = glaciair_variables.get("ssm_parameter_name", "")
-    s3_path: str = glaciair_variables.get("s3_path", "")  # bucket_name/prefix
+    s3_bucket: str = glaciair_variables.get("s3_bucket", "")
+    s3_prefix: str = glaciair_variables.get("s3_prefix", "")
 
     # This expects a JSON list object in the Airflow Variable.
     spreadsheet_names: list[str] = glaciair_variables.get(
@@ -48,41 +42,54 @@ def _validate_variables() -> dict[str, Any]:
             if not isinstance(sheet_name, str):
                 raise ValueError("Sheet names must be a string.")
     return {
-        "ssm_paramater_name": ssm_parameter_name,
+        "ssm_parameter_name": ssm_parameter_name,
         "spreadsheet_names": spreadsheet_names,
-        "s3_path": s3_path
+        "s3_bucket": s3_bucket,
+        "s3_prefix": s3_prefix
     }
 
 
-def load_gsheets_s3_csv(report_date):
+def sync_glaciair_gsheets_to_s3(report_date: str) -> None:
     """
-    A function to load google sheets source data into S3 bucket
+    Main Task Function to Sync Glaciair Google Sheets Data to S3.
+
+    Args:
+        report_date (str): The date for which the report is being generated.
     """
 
-    # validate airflow variables
-    variables = _validate_variables()
+    glacair_variables = _validate_variables()
+    num_airflow_variables: int = len(glacair_variables)
+    logger.info(
+        f"Validated {num_airflow_variables} GlaciAir Airflow Variables"
+    )
 
-    google_service_creds = _get_ssm_paramater(variables["ssm_paramater_name"])
-    cred_dict = json.loads(google_service_creds["Parameter"]["Value"])
-    s3_path = variables["s3_path"]
+    num_spreadsheets: int = len(glacair_variables["spreadsheet_names"])
+    logger.info(
+        f"Found {num_spreadsheets} Google Sheets to sync."
+    )
 
-    # authenticate google service account
-    gc = gspread.service_account_from_dict(cred_dict)
+    google_service_cred = _get_ssm_paramater(
+        glacair_variables["ssm_parameter_name"]
+    )
+    logger.info(
+        "Retrieved Google Service Account credentials from SSM Parameter."
+    )
 
-    # open google sheets by name
-    for gsheet_name in variables["spreadsheet_names"]:
-        spreadsheet = gc.open(gsheet_name)
-        # selecting worksheet by its title sheet1
-        worksheet = spreadsheet.worksheet("Sheet1")
-
-        # convert google sheet data to pandas dataframe
-        sheet_df = pd.DataFrame(worksheet.get_all_records())
-
-        s3_prefix = gsheet_name.lower().replace(' ', '_')
-        wr.s3.to_csv(
-            df=sheet_df,
-            path=f's3://{s3_path}/glaciair/{report_date}/{s3_prefix}.csv',
-            index=False
+    for i, gsheet_name in enumerate(
+        glacair_variables["spreadsheet_names"],
+        start=1
+    ):
+        logger.info(
+            f"{i}/{num_spreadsheets} ... "
+            f"Starting Glaciair GSheets to S3 Sync for Sheet: {gsheet_name!r}"
         )
 
-        print(f"Data {gsheet_name} written to s3 bucket successfully!!")
+        load_gsheet_to_s3(
+            gsheet_name=gsheet_name,
+            s3_bucket=glacair_variables["s3_bucket"],
+            s3_prefix=glacair_variables["s3_prefix"],
+            service_credentials=json.loads(
+                google_service_cred["Parameter"]["Value"]
+            ),
+            format="parquet"
+        )

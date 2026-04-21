@@ -4,13 +4,8 @@ from typing import Any
 from airflow.providers.standard.operators.python import PythonOperator
 from airflow.sdk import DAG
 
-from business_logic.glaciair_logic import load_gsheets_s3_csv
+from business_logic.glaciair_logic import sync_glaciair_gsheets_to_s3
 
-# Airflow Variables used in DAG
-# GLACIAIR_S3_PATH
-# GLACIAIR_SPREADSHEETS
-# GLACIAIR_SSM_PARAMETER
-#######################################
 
 DAG_ID: str = "glaciair-logistics-data-sync"
 DEFAULT_ARGS: dict[str, Any] = {
@@ -32,6 +27,6 @@ with DAG(
 ):
     run_pipeline = PythonOperator(
         task_id="load_gsheet_to_s3",
-        python_callable=load_gsheets_s3_csv,
+        python_callable=sync_glaciair_gsheets_to_s3,
         op_kwargs={"report_date": "{{ ds }}"},
     )
