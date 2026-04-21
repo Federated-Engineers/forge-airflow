@@ -1,11 +1,11 @@
-import logging
-import gspread
-import boto3
 import json
-from plugins.google_auth import get_google_credentials
+import logging
+
 import awswrangler as wr
+import boto3
 from airflow.sdk import Variable
 
+from plugins.google_auth import get_google_credentials
 
 log = logging.getLogger(__name__)
 bucket = 'km-raw-datalake'
@@ -40,8 +40,10 @@ def write_df_to_sheet(df, spreadsheet_id, sheetname):
 def extract_load_portugal(spreadsheet_id, sheetname):
     """Extracts Portugal data from s3 and loads to google sheet"""
     s3 = boto3.client("s3")
-    all_files = s3.list_objects_v2(Bucket=bucket, 
-                                   Prefix=f"{folder}/").get("Contents", [])
+    all_files = s3.list_objects_v2(
+        Bucket=bucket,
+        Prefix=f"{folder}/"
+       ).get("Contents", [])
     loaded_files = json.loads(Variable.get(VARIABLE_KEY, default="[]"))
 
     for file in all_files:
