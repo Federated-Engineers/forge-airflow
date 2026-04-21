@@ -36,7 +36,7 @@ def extract_load_portugal(spreadsheet_id, sheetname):
     s3 = boto3.client("s3")
     all_files = s3.list_objects_v2(Bucket=bucket, 
                                    Prefix=f"{folder}/").get("Contents", [])
-    loaded_files = json.loads(Variable.get(VARIABLE_KEY, default_var="[]"))
+    loaded_files = json.loads(Variable.get(VARIABLE_KEY, default="[]"))
 
     for file in all_files:
         file_key = file["Key"]
