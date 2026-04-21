@@ -22,15 +22,12 @@ def _validate_variables() -> dict[str, Any]:
         deserialize_json=True
     )
 
-    ssm_parameter_name: str = glaciair_variables.get("ssm_parameter_name", "")
-    s3_bucket: str = glaciair_variables.get("s3_bucket", "")
-    s3_prefix: str = glaciair_variables.get("s3_prefix", "")
+    ssm_parameter_name: str = glaciair_variables["ssm_parameter_name"]
+    s3_bucket: str = glaciair_variables["s3_bucket"]
+    s3_prefix: str = glaciair_variables["s3_prefix"]
 
     # This expects a JSON list object in the Airflow Variable.
-    spreadsheet_names: list[str] = glaciair_variables.get(
-        "spreadsheet_names",
-        []
-    )
+    spreadsheet_names: list[str] = glaciair_variables["spreadsheet_names"]
     if not isinstance(spreadsheet_names, list):
         raise ValueError("Spreadsheet names must be a JSON List.")
     else:
