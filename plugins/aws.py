@@ -1,37 +1,47 @@
+import base64
 import json
-from typing import Dict, List
+import logging
+from typing import Dict
 
 import boto3
-import gspread
-from google.oauth2.service_account import Credentials
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s | %(levelname)s | %(message)s"
+)
+log = logging.getLogger()
 
 
-def retrieve_google_credentials() -> Dict:
+def retrieve_ssm_parameter_value() -> Dict | str:
     """
     Retrieve Google service account credentials from
     AWS Systems Manager Parameter Store.
 
     Returns:
-        Dict: A dictionary containing the Google service account credentials
-    """
+        Dict | str: Parsed credentials dict, or raw string if not JSON
 
+    Raises:
+        ValueError: If the parameter value cannot be parsed
+    """
     client = boto3.session.Session().client(service_name="ssm")
     response = client.get_parameter(
-        Name="/production/google-service-account/credentials"
+        Name="/production/google-service-account/credentials",
+        WithDecryption=True
     )
-    return json.loads(response["Parameter"]["Value"])
+    value = response["Parameter"]["Value"]
 
+    try:
+        return json.loads(value)
+    except (json.JSONDecodeError, ValueError) as e:
+        log.info(f"Could not parse SSM parameter as JSON. ERROR {str(e)}")
+        pass
 
-def authenticate_google_sheet(scopes: List) -> gspread.Client:
-    """
-    Authenticate with Google Sheets API and return an
-    authorised gspread client.
+    try:
+        decoded = base64.b64decode(value).decode("utf-8")
+        return json.loads(decoded)
+    except Exception as e:
+        log.info(f"Could not parse SSM parameter as base64-encoded JSON. "
+                 f"ERROR {str(e)}")
+        pass
 
-    Returns:
-        gspread.Client: An authorised gspread client instance
-    """
-    creds = Credentials.from_service_account_info(
-        retrieve_google_credentials(), scopes=scopes
-    )
-    client = gspread.authorize(creds)
-    return client
+    return value

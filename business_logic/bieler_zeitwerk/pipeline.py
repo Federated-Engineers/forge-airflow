@@ -6,12 +6,14 @@ from airflow.models import Variable
 from airflow.providers.amazon.aws.hooks.s3 import S3Hook
 from airflow.utils.log.logging_mixin import LoggingMixin
 
-from plugins.aws import authenticate_google_sheet
+from plugins.google_sheets import authenticate_google_sheet
 
 log = LoggingMixin().log
-s3_hook = S3Hook(aws_conn_id="aws_airflow_user")
+
 
 config = Variable.get("bieler_zeitwerk_config")
+
+s3_hook = S3Hook()
 
 
 def get_all_records(client: gspread.Client) -> pd.DataFrame:
@@ -46,10 +48,8 @@ def copy_to_s3(records: pd.DataFrame, dest_bucket: str, dest_key: str) -> None:
     csv_data = records.to_csv(index=False)
 
     s3_hook.load_string(
-        string_data=csv_data,
-        key=dest_key,
-        bucket_name=dest_bucket,
-        replace=True
+        string_data=csv_data, key=dest_key,
+        bucket_name=dest_bucket, replace=True
     )
 
 
