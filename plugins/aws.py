@@ -1,15 +1,9 @@
 import base64
 import json
-import logging
 from typing import Dict
 
 import boto3
-
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s | %(levelname)s | %(message)s"
-)
-log = logging.getLogger()
+from logger import log
 
 
 def retrieve_ssm_parameter_value() -> Dict | str:
@@ -40,8 +34,10 @@ def retrieve_ssm_parameter_value() -> Dict | str:
         decoded = base64.b64decode(value).decode("utf-8")
         return json.loads(decoded)
     except Exception as e:
-        log.info(f"Could not parse SSM parameter as base64-encoded JSON. "
-                 f"ERROR {str(e)}")
+        log.info(
+            f"Could not parse SSM parameter as base64-encoded JSON. "
+            f"ERROR {str(e)}"
+        )
         pass
 
     return value

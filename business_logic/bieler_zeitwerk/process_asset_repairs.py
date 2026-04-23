@@ -1,34 +1,32 @@
 from datetime import date
 
-import gspread
 import pandas as pd
 from airflow.models import Variable
 from airflow.providers.amazon.aws.hooks.s3 import S3Hook
-from airflow.utils.log.logging_mixin import LoggingMixin
 
-from plugins.google_sheets import authenticate_google_sheet
+from plugins.google_sheets import (authenticate_google_sheet,
+                                   get_google_sheet_records)
+from plugins.logger import log
 
-log = LoggingMixin().log
-
-
-config = Variable.get("bieler_zeitwerk_config")
-
+config = Variable.get("bieler_zeitwerk_config", deserialize_json=True)
 s3_hook = S3Hook()
 
 
-def get_all_records(client: gspread.Client) -> pd.DataFrame:
+def get_all_records() -> pd.DataFrame:
     """
-    Fetch all records from the configured Google Sheet worksheet.
-    Args:
-        client: Authenticated gspread client.
+    Fetch all records from a Google Sheet worksheet by calling
+    `get_google_sheet_records()` and transform them into a pandas DataFrame.
+
     Returns:
         DataFrame containing all rows from the worksheet.
     """
-    sheet = client.open_by_key(config["spreadsheet_id"]).worksheet(
-        config["worksheet_name"]
-    )
+    spreadsheet_id = config.get("spreadsheet_id")
+    worksheet_name = config.get("worksheet_name")
+    google_client = authenticate_google_sheet(config["scopes"])
 
-    data = sheet.get_all_records()
+    data = get_google_sheet_records(
+        google_client, spreadsheet_id, worksheet_name
+    )
     records_df = pd.DataFrame(data)
 
     return records_df
@@ -63,11 +61,9 @@ def run_pipeline() -> None:
     Raises an exception if no records are found.
     """
     extraction_date = str(date.today())
-    google_client = authenticate_google_sheet(config["scopes"])
-    data = get_all_records(google_client)
+    data = get_all_records()
 
     if data.empty:
-        log.error("No records asset repair found")
         raise Exception("No asset repair records found")
 
     key = f"{config['prefix']}/{extraction_date}/asset_repair.csv"
