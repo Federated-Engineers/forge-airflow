@@ -2,11 +2,11 @@ from airflow.decorators import dag, task
 from airflow.models import Variable
 from pendulum import datetime as pendulum_datetime
 from datetime import timedelta
-from business_logic.bbss_weather_elt import (
+from business_logic.bbss_elt_pipeline import (
     get_forecast, generate_s3_partitioned_key,
     dump_json_to_s3, transform_forecast, send_parquet_to_s3
 )
-from business_logic.slack_alerts import slack_failure_alert, slack_success_alert
+from business_logic.slack_utils import slack_failure_alert, slack_success_alert
 
 @dag(
     dag_id="bbss_weather_forecast_ingestion_pipeline",
