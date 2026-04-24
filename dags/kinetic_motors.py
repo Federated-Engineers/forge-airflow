@@ -1,10 +1,13 @@
+import json
 from datetime import datetime, timedelta
 
 from airflow import DAG
+from airflow.models import Variable
 from airflow.providers.standard.operators.python import PythonOperator
 
-from business_logic.kinetic_motors.config import config
 from business_logic.kinetic_motors.extract_load import extract_load_portugal
+
+config = json.loads(Variable.get("km_config"))
 
 spreadsheet_id = config["spreadsheet_id"]
 sheetname = config["sheetname"]
@@ -14,7 +17,7 @@ default_args = {
     'depends_on_past': False,
     "start_date": datetime(2026, 4, 18),
     "retries": 2,
-    "retry_delay": timedelta(minutes=5),
+    "retry_delay": timedelta(minutes=2),
 }
 
 with DAG(

@@ -8,8 +8,10 @@ from airflow.sdk import Variable
 from plugins.google_auth import get_google_credentials
 
 log = logging.getLogger(__name__)
-bucket = 'km-raw-datalake'
-folder = "daily_extracts"
+
+config = json.loads(Variable.get("km_config"))
+bucket = config["bucket"]
+folder = config["folder"]
 VARIABLE_KEY = "km_loaded_files"
 
 
