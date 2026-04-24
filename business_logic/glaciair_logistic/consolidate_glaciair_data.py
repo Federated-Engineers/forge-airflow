@@ -5,9 +5,8 @@ import awswrangler as wr
 import pandas as pd
 from airflow.models import Variable
 
-from plugins.google_sheets import (
-    authenticate_google_sheet, get_google_sheet_records
-)
+from plugins.google_sheets import (authenticate_google_sheet,
+                                   get_google_sheet_records)
 from plugins.logger import log
 
 glaciair_variables = Variable.get("GLACIAIR_LOGISTICS", deserialize_json=True)
