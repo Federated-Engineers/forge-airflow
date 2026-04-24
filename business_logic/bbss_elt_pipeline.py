@@ -67,10 +67,10 @@ def dump_json_to_s3(nextday_forecast: list, bucket_name: str, partition_key: str
         logger.error(f"Failed to upload raw JSON to S3: {e}")
         raise
 
-def transform_forecast(next_day_forecast: list) -> list:
-    logger.info(f"Transforming {len(tomorrow_hours)} hourly records...")
+def transform_forecast(nextday_forecast: list) -> list:
+    logger.info(f"Transforming {len(nextday_forecast)} hourly records...")
     flat_data = []
-    for hour in next_day_forecast:
+    for hour in nextday_forecast:
         flat = {k: v for k, v in hour.items() if k not in ['condition', 'wind_dir', 'time_epoch']}
         flat['time'] = hour['time'].split(' ')[1]
         flat['wind_degree_sin'] = np.sin(np.radians(hour['wind_degree']))
