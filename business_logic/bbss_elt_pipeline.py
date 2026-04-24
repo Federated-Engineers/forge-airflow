@@ -10,7 +10,7 @@ import io
 from airflow.providers.amazon.aws.hooks.s3 import S3Hook
 from airflow.models import Variable
 
-api_key = Variable.get("WEATHER_API_KEY")
+API_KEY = Variable.get("WEATHER_API_KEY")
 BASE_URL = "https://api.weatherapi.com/v1"
 logger = logging.getLogger(__name__)
 s3_hook = S3Hook()
