@@ -42,6 +42,7 @@ def slack_success_alert(context):
     dag_id = ti.dag_id
     task_id = ti.task_id
     run_id = ti.run_id
+    execution_time = getattr(ti, "start_date", "unknown")
     log_url = ti.log_url
 
     message = {
