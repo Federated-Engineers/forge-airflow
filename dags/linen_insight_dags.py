@@ -2,10 +2,9 @@ from airflow import DAG
 from airflow.providers.standard.operators.python import PythonOperator
 from pendulum import datetime
 
-
+from business_logic.linen_luxury.extraction import extraction
 from business_logic.linen_luxury.load import move_file_s3
 from business_logic.linen_luxury.transform import transformation
-from business_logic.linen_luxury.extraction import extraction
 
 with DAG(
     dag_id="Liffey_Linens_Insights",

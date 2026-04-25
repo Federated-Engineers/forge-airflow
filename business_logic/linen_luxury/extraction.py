@@ -1,9 +1,10 @@
 import os
-import pandas as pd
+
 import gspread
-from airflow.providers.postgres.hooks.postgres import PostgresHook
-from airflow.providers.google.suite.hooks.sheets import GSheetsHook
+import pandas as pd
 from airflow.models import Connection, Variable
+from airflow.providers.google.suite.hooks.sheets import GSheetsHook
+from airflow.providers.postgres.hooks.postgres import PostgresHook
 
 
 def extraction():

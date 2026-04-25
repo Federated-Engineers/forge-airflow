@@ -1,11 +1,10 @@
 import os
-import pandas as pd
 from io import BytesIO
-from airflow.providers.amazon.aws.hooks.s3 import S3Hook
-from airflow.providers.amazon.aws.hooks.athena import AthenaHook
+
+import pandas as pd
 from airflow.models import Variable
-
-
+from airflow.providers.amazon.aws.hooks.athena import AthenaHook
+from airflow.providers.amazon.aws.hooks.s3 import S3Hook
 
 
 def anthena_creation(df, tablename, s3_path):
