@@ -29,11 +29,9 @@ def anthena_creation(df, tablename, s3_path):
     columns = ", ".join(col_definitions)
 
     create_table = (
-        f"CREATE EXTERNAL TABLE IF NOT EXISTS "
-        f"{athena_db_name}.{tablename} ({columns}) "
-        f"STORED AS PARQUET "
-        f"LOCATION '{s3_path}' "
-        f"TBLPROPERTIES ('parquet.compress'='SNAPPY');"
+        f"CREATE EXTERNAL TABLE IF NOT EXISTS {athena_db_name}.{tablename} "
+        f"({columns}) STORED AS PARQUET LOCATION '{s3_path}' "
+        "TBLPROPERTIES ('parquet.compress'='SNAPPY');"
     )
     athena_hook.run_query(
         query=create_table,
