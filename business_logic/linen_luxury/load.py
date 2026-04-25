@@ -1,4 +1,3 @@
-import os
 from io import BytesIO
 
 from airflow.models import Variable
@@ -21,10 +20,15 @@ def anthena_creation(df, tablename, s3_path):
         'bool': 'BOOLEAN',
         'object': 'STRING'
     }
-    columns = ", ".join(
-        [f"`{col}` {type_map.get(str(dtype).lower(), 'STRING')}" for col, dtype in df.dtypes.items()])
 
-    create_table = f""" 
+    # Broken into a list comprehension for length
+    col_definitions = [
+        f"`{col}` {type_map.get(str(dtype).lower(), 'STRING')}"
+        for col, dtype in df.dtypes.items()
+    ]
+    columns = ", ".join(col_definitions)
+
+    create_table = f"""
     CREATE EXTERNAL TABLE IF NOT EXISTS {athena_db_name}.{tablename} ({columns})
     STORED AS PARQUET
     LOCATION '{s3_path}'
@@ -41,13 +45,13 @@ def anthena_creation(df, tablename, s3_path):
 
 
 def move_file_s3(df, key, tablename):
-
     s3_hook = S3Hook(aws_conn_id='aws_conn')
     s3_bucket_name = Variable.get("S3_BUCKET_NAME")
 
     pq_buffer = BytesIO()
-    df.to_parquet(pq_buffer, engine='pyarrow',
-                  index=False, compression='snappy')
+    df.to_parquet(
+        pq_buffer, engine='pyarrow', index=False, compression='snappy'
+    )
 
     s3_hook.load_file_obj(
         file_obj=pq_buffer,
@@ -56,7 +60,9 @@ def move_file_s3(df, key, tablename):
         replace=True
     )
 
-    s3_folder_path = f"s3://{s3_bucket_name}/{os.path.dirname(key)}/"
+    # Manual fix for s3_folder_path to keep it under 79 chars
+    parent_dir = "/".join(key.split("/")[:-1])
+    s3_folder_path = f"s3://{s3_bucket_name}/{parent_dir}/"
 
     anthena_creation(df, tablename, s3_folder_path)
 
