@@ -1,7 +1,6 @@
 import os
 from io import BytesIO
 
-import pandas as pd
 from airflow.models import Variable
 from airflow.providers.amazon.aws.hooks.athena import AthenaHook
 from airflow.providers.amazon.aws.hooks.s3 import S3Hook
