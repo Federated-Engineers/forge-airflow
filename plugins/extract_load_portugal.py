@@ -1,5 +1,7 @@
-import awswrangler as wr
 import logging
+
+import awswrangler as wr
+
 from plugins.google_sheets import authenticate_google_sheet
 
 log = logging.getLogger(__name__)

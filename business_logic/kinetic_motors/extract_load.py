@@ -1,6 +1,8 @@
 import json
 import logging
+
 from airflow.sdk import Variable
+
 from plugins.extract_load_portugal import extract_portugal, write_df_to_sheet
 
 log = logging.getLogger(__name__)
