@@ -1,6 +1,7 @@
 import json
 import logging
 
+import boto3
 from airflow.sdk import Variable
 
 from plugins.extract_load_portugal import extract_portugal, write_df_to_sheet

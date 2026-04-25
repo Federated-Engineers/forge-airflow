@@ -1,10 +1,14 @@
+import json
 import logging
 
 import awswrangler as wr
+from airflow.sdk import Variable
 
 from plugins.google_sheets import authenticate_google_sheet
 
 log = logging.getLogger(__name__)
+config = json.loads(Variable.get("km_config"))
+bucket = config["bucket"]
 
 
 def extract_portugal(file_key):
@@ -27,7 +31,7 @@ def write_df_to_sheet(df, spreadsheet_id, sheetname):
     Authenticate with Google Sheets API and
     writes data from a Dataframe to Google Sheet.
     If the Sheet is empty, adds a header to the first row,
-    else it appends data from the Dataframe to the Sheets. 
+    else it appends data from the Dataframe to the Sheets.
     """
     scopes = ["https://www.googleapis.com/auth/spreadsheets",
               "https://www.googleapis.com/auth/drive"]
