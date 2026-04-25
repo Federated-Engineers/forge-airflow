@@ -28,13 +28,13 @@ def anthena_creation(df, tablename, s3_path):
     ]
     columns = ", ".join(col_definitions)
 
-    create_table = f"""
-    CREATE EXTERNAL TABLE IF NOT EXISTS {athena_db_name}.{tablename} ({columns})
-    STORED AS PARQUET
-    LOCATION '{s3_path}'
-    TBLPROPERTIES ('parquet.compress'='SNAPPY');
-    """
-
+    create_table = (
+        f"CREATE EXTERNAL TABLE IF NOT EXISTS "
+        f"{athena_db_name}.{tablename} ({columns}) "
+        f"STORED AS PARQUET "
+        f"LOCATION '{s3_path}' "
+        f"TBLPROPERTIES ('parquet.compress'='SNAPPY');"
+    )
     athena_hook.run_query(
         query=create_table,
         query_context={'Database': athena_db_name},
@@ -60,7 +60,6 @@ def move_file_s3(df, key, tablename):
         replace=True
     )
 
-    # Manual fix for s3_folder_path to keep it under 79 chars
     parent_dir = "/".join(key.split("/")[:-1])
     s3_folder_path = f"s3://{s3_bucket_name}/{parent_dir}/"
 
