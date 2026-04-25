@@ -14,7 +14,7 @@ from business_logic.slack_utils import slack_failure_alert, slack_success_alert
     start_date=pendulum_datetime(2026, 4, 23),
     catchup=False,
     default_args={
-        "retries": 1,
+        "retries": 2,
         "retry_delay": timedelta(seconds=100),
 	"on_failure_callback": slack_failure_alert,
 	"on_success_callback": slack_success_alert
