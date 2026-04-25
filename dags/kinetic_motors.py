@@ -1,10 +1,9 @@
-import json
 from datetime import datetime, timedelta
 
+import json
 from airflow import DAG
-from airflow.models import Variable
+from airflow.sdk import Variable
 from airflow.providers.standard.operators.python import PythonOperator
-
 from business_logic.kinetic_motors.extract_load import extract_load_portugal
 
 config = json.loads(Variable.get("km_config"))
