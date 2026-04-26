@@ -1,5 +1,6 @@
 from datetime import date
 
+
 def get_today_date() -> date:
     '''
     Get today's date for partitioning s3 objects
