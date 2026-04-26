@@ -1,9 +1,3 @@
 logs/
 venv/
-.myvenv/
 *__pycache__*
-business_logic/linen_luxury/datasets-lll-5a3914feb8ab.json
-business_logic/linen_luxury/lll.ipynb
-business_logic/linen_luxury/*.env
-
-

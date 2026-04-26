@@ -1,12 +1,13 @@
-from io import BytesIO
-
+import awswrangler as wr
 from airflow.models import Variable
 from airflow.providers.amazon.aws.hooks.athena import AthenaHook
-from airflow.providers.amazon.aws.hooks.s3 import S3Hook
 
 
 def anthena_creation(df, tablename, s3_path):
-    athena_hook = AthenaHook(aws_conn_id='aws_conn')
+    """
+    Register the Parquet file as an external table in AWS Athena.
+    """
+    athena_hook = AthenaHook()
 
     athena_db_name = Variable.get("Anthena_DB")
     athena_output = Variable.get("Anthena_Output_S3")
@@ -21,7 +22,6 @@ def anthena_creation(df, tablename, s3_path):
         'object': 'STRING'
     }
 
-    # Broken into a list comprehension for length
     col_definitions = [
         f"`{col}` {type_map.get(str(dtype).lower(), 'STRING')}"
         for col, dtype in df.dtypes.items()
@@ -39,28 +39,20 @@ def anthena_creation(df, tablename, s3_path):
         result_configuration={'OutputLocation': athena_output}
     )
 
-    print(f"Anthena Table '{tablename} registration submitted")
-
 
 def move_file_s3(df, key, tablename):
-    s3_hook = S3Hook(aws_conn_id='aws_conn')
+    """
+    Upload DataFrame to S3 as Parquet and trigger Athena registration.
+    """
     s3_bucket_name = Variable.get("S3_BUCKET_NAME")
+    s3_path = f"s3://{s3_bucket_name}/{key}"
 
-    pq_buffer = BytesIO()
-    df.to_parquet(
-        pq_buffer, engine='pyarrow', index=False, compression='snappy'
+    wr.s3.to_parquet(
+        df=df,
+        path=s3_path,
+        index=False,
+        compression="snappy"
     )
 
-    s3_hook.load_file_obj(
-        file_obj=pq_buffer,
-        key=key,
-        bucket_name=s3_bucket_name,
-        replace=True
-    )
-
-    parent_dir = "/".join(key.split("/")[:-1])
-    s3_folder_path = f"s3://{s3_bucket_name}/{parent_dir}/"
-
-    anthena_creation(df, tablename, s3_folder_path)
-
-    print(f"Full Load Complete: {key}")
+    # Use rsplit to get the directory path for Athena
+    anthena_creation(df, tablename, s3_path.rsplit('/', 1)[0] + "/")

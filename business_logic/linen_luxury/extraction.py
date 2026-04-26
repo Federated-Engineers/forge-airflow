@@ -1,41 +1,51 @@
-import gspread
 import pandas as pd
-from airflow.models import Connection, Variable
+from airflow.models import Variable
 from airflow.providers.postgres.hooks.postgres import PostgresHook
 
+from plugins.google_sheets import (
+    authenticate_google_sheet,
+    get_google_sheet_records
+)
 
-def extraction():
+
+def postgress_extraction():
+    """
+    Extracts data from Postgres database using internal modules.
+    """
+    # 1. Postgres Extraction
     pg_hook = PostgresHook(postgres_conn_id="supabase_postgres")
-
     pg_data = pg_hook.get_pandas_df(
-        sql="SELECT * FROM historical.liffey_luxury_order_transactions")
+        sql="SELECT * FROM historical.liffey_luxury_order_transactions"
+    )
 
-    # google pull
-    conn = Connection.get_connection_from_secrets("google_sheets_con")
-
-    parms = conn.extra_dejson
-
-    if parms and "keyfile_dict" in parms:
-        creds = parms.get("keyfile_dict")
-    else:
-        creds = parms
-
-    if not creds:
-        raise ValueError(
-            "Could not find credentials in 'google_sheets_con' Extra field!")
-
-    auth = gspread.service_account_from_dict(creds)
-
-    sheet_id = Variable.get("SHEET_NAME").strip()
-    tab_name = Variable.get("WORKSHEET_NAME").strip()
-
-    spreadsheet = auth.open_by_key(sheet_id)
-    worksheet = spreadsheet.worksheet(tab_name)
-
-    get_data = worksheet.get_all_values()
-
-    google_data = pd.DataFrame(
-        get_data[1:], columns=get_data[0]) if get_data else pd.DataFrame()
     postgres_data = pd.DataFrame(pg_data)
 
-    return google_data, postgres_data
+    return postgres_data
+
+
+def google_extraction():
+    """
+    Extracts data from Google Sheets.
+    """
+    # scopes for Google Sheets
+    scopes = ["https://www.googleapis.com/auth/spreadsheets.readonly"]
+
+    # Use the existing module to authenticate
+    client = authenticate_google_sheet(scopes)
+    sheet_config = Variable.get(
+        "LINEN_LUXURY_SHEET_CONFIG",
+        deserialize_json=True
+    )
+
+    # Get IDs from Airflow Variables
+    sheet_id = sheet_config.get("sheet_id").strip()
+    tab_name = sheet_config.get("tab_name").strip()
+
+    # Use the existing module to fetch data
+    # This returns a List of Dictionaries
+    records = get_google_sheet_records(client, sheet_id, tab_name)
+
+    # Convert to DataFrame
+    google_data = pd.DataFrame(records)
+
+    return google_data
