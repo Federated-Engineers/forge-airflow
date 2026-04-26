@@ -10,9 +10,6 @@ from plugins.google_sheets import authenticate_google_sheet
 log = logging.getLogger(__name__)
 
 
-VARIABLE_KEY = "km_loaded_files"
-
-
 def extract_load_portugal(spreadsheet_id, sheetname):
     """Extracts Portugal data from s3 and loads to google sheet.
 
@@ -24,6 +21,7 @@ def extract_load_portugal(spreadsheet_id, sheetname):
     bucket = config["bucket"]
     folder = config["folder"]
     scopes = config["scopes"]
+    VARIABLE_KEY = config["loaded_files_key"]
 
     google_cred = authenticate_google_sheet(scopes)
     s3 = boto3.client("s3")
@@ -43,6 +41,11 @@ def extract_load_portugal(spreadsheet_id, sheetname):
             log.info(f"{file_key} already loaded, skipping.")
             continue
 
+        df = extract_portugal(file_key)
+        write_df_to_sheet(df, spreadsheet_id, sheetname)
+        loaded_files.append(file_key)
+        Variable.set(VARIABLE_KEY, json.dumps(loaded_files))
+        log.info(f'Successfully loaded {file_key}, {len(df)} rows updated')
         df = extract_portugal(file_key, bucket)
         log.info(f"Writing to sheet: {spreadsheet_id} | {sheetname}")
         write_df_to_sheet(df, spreadsheet_id, sheetname, google_cred)
