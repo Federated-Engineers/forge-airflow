@@ -2,8 +2,8 @@ from airflow import DAG
 from airflow.providers.standard.operators.python import PythonOperator
 from pendulum import datetime
 
-from business_logic.linen_luxury.extraction import postgress_extraction
-from business_logic.linen_luxury.extraction import google_extraction
+from business_logic.linen_luxury.extraction import (google_extraction,
+                                                    postgress_extraction)
 from business_logic.linen_luxury.load import move_file_s3
 
 
