@@ -1,8 +1,0 @@
-#!/home/root1/Desktop/forge-airflow/.myvenv/bin/python3
-import sys
-
-from markdown_it.cli.parse import main
-
-if __name__ == '__main__':
-    sys.argv[0] = sys.argv[0].removesuffix('.exe')
-    sys.exit(main())
