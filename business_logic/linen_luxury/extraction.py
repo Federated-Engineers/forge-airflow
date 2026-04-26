@@ -23,7 +23,7 @@ def postgress_extraction():
 
 def google_extraction():
     """
-    Extracts data from Google Sheets.
+    Extracts data from Google Sheet
     """
     # scopes for Google Sheets
     scopes = ["https://www.googleapis.com/auth/spreadsheets.readonly"]
