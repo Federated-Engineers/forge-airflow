@@ -41,3 +41,23 @@ def retrieve_ssm_parameter_value() -> Dict | str:
         pass
 
     return value
+
+
+
+def hive_partitioned_bucket_setup(prefix: str, date_str: str) -> str:
+    """
+    Generates a Hive-style partitioned S3 key from a date string.
+
+    Args:
+        prefix (str): The top-level prefix e.g. 'raw' or 'transformed'.
+        date_str (str): A date string in 'YYYY-MM-DD' format.
+
+    Returns:
+        str: A partitioned S3 key e.g. 'raw/year=2026/month=04/day=25'.
+    """
+
+    parts = date_str.split("-")
+    year, month, day = parts
+    key = f"{prefix}/year={year}/month={month}/day={day}"
+    log.info(f"Generated S3 key: {key}")
+    return key
