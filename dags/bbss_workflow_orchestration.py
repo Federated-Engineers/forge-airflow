@@ -1,10 +1,11 @@
+from datetime import timedelta
+
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 from pendulum import datetime as pendulum_datetime
-from datetime import timedelta
+
 from business_logic.bbss_weather_forecast.tasks import (
-    fetch, dump_raw_json, transform, send_transformed_parquet
-)
+    dump_raw_json, fetch, send_transformed_parquet, transform)
 from plugins.slack_utils import slack_failure_alert, slack_success_alert
 
 default_args={
