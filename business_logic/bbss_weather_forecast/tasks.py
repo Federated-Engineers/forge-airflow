@@ -1,8 +1,9 @@
 from airflow.sdk import Variable
-from business_logic.bbss_weather_forecast.pipeline import (
-    get_forecast, dump_json_to_s3, 
-    transform_forecast, send_parquet_to_s3
-)
+
+from business_logic.bbss_weather_forecast.pipeline import (dump_json_to_s3,
+                                                           get_forecast,
+                                                           send_parquet_to_s3,
+                                                           transform_forecast)
 from plugins.aws import hive_partitioned_bucket_setup
 
 bbss_s3_bucket = Variable.get("BUCKET_NAME")
