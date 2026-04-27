@@ -1,6 +1,8 @@
-import requests
 import logging
+
+import requests
 from airflow.models import Variable
+
 
 def slack_failure_alert(context):
     ti = context["task_instance"]
