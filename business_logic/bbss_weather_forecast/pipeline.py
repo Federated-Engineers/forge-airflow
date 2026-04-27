@@ -4,9 +4,7 @@ import numpy as np
 import json
 import logging
 import pandas as pd
-import pyarrow as pa
-import pyarrow.parquet as pq
-import io
+import awswrangler as wr
 from airflow.providers.amazon.aws.hooks.s3 import S3Hook
 from airflow.sdk import Variable
 
@@ -14,15 +12,17 @@ config = Variable.get("bbss_weather_api_config", deserialize_json=True)
 logger = logging.getLogger(__name__)
 s3_hook = S3Hook()
 
-class WeatherAPIError(Exception):
-    """Raised when WeatherAPI returns an error response."""
-    def __init__(self, code, message):
-        self.code = code
-        self.message = message
-        super().__init__(f"WeatherAPI error {code}: {message}")
-
-
 def get_forecast() -> dict:
+    """
+    Fetches the next day's hourly weather forecast from WeatherAPI for the selected location.
+
+    Retrieves a 2-day forecast (today and tomorrow)  and extracts the hourly records for tomorrow.
+    Raises an Exception if the API returns a non-200 status code.
+
+    Returns:
+        list: A list of hourly forecast records for the next day.
+    """
+
     logger.info("Fetching forecast from WeatherAPI for Calvia...")
     params = {
         "key": config.get("API_KEY"),
@@ -31,28 +31,32 @@ def get_forecast() -> dict:
         "aqi": "yes",
         "alerts": "yes"
     }
-    base_url = config.get(BASE_URL)
+    base_url = config.get("BASE_URL")
     response = requests.get(f"{base_url}/forecast.json", params=params)
 
-    if not response.ok:
+    if response.status_code != 200:
         error = response.json()["error"]
         logger.error(f"WeatherAPI error {error['code']}: {error['message']}")
-        raise WeatherAPIError(error["code"], error["message"])
+        raise Exception (f"WeatherAPI error {error['code']}: {error['message']}")
 
     forecast = response.json()
     tomorrow_hours = forecast['forecast']['forecastday'][1]['hour']
     logger.info(f"Successfully fetched {len(tomorrow_hours)} hourly records")
     return tomorrow_hours
 
-def generate_s3_partitioned_key(prefix: str, date_str: str) -> str:
-    parts = date_str.split("-")
-    year, month, day = parts
-    key = f"{prefix}/year={year}/month={month}/day={day}"
-    logger.info(f"Generated S3 key: {key}")
-    return key
-
-
 def dump_json_to_s3(nextday_forecast: list, bucket_name: str, partition_key: str):
+    """
+    Serializes the raw forecast data as JSON and uploads it to S3.
+
+    Args:
+        nextday_forecast (list): List of hourly forecast records to upload.
+        bucket_name (str): The target S3 bucket name.
+        partition_key (str): The S3 key prefix for the partitioned path.
+
+    Raises:
+        Exception: If the upload to S3 fails.
+    """
+
     logger.info(f"Dumping raw JSON to s3://{bucket_name}/{partition_key}")
     try:
         s3_hook.load_string(
@@ -67,6 +71,19 @@ def dump_json_to_s3(nextday_forecast: list, bucket_name: str, partition_key: str
         raise
 
 def transform_forecast(nextday_forecast: list) -> list:
+    """
+    Transforms raw hourly forecast records into a flattened structure.
+
+    Drops unnecessary fields, extracts the time component, and engineers
+    sine and cosine features from wind degree for cyclical encoding.
+
+    Args:
+        nextday_forecast (list): List of raw hourly forecast records.
+
+    Returns:
+        list: A list of transformed and flattened forecast records.
+    """
+
     logger.info(f"Transforming {len(nextday_forecast)} hourly records...")
     flat_data = []
     for hour in nextday_forecast:
@@ -79,18 +96,25 @@ def transform_forecast(nextday_forecast: list) -> list:
     return flat_data
 
 def send_parquet_to_s3(transformed: list, bucket_name: str,  partition_key: str):
+    """
+    Converts transformed forecast records to Parquet format and uploads to S3.
+
+    Args:
+        transformed (list): List of transformed forecast records.
+        bucket_name (str): The target S3 bucket name.
+        partition_key (str): The S3 key prefix for the partitioned path.
+
+    Raises:
+        Exception: If the Parquet conversion or S3 upload fails.
+    """
+
     logger.info(f"Converting {len(transformed)} records to Parquet and uploading to s3://{bucket_name}/{partition_key}")
     try:
         weather_df = pd.DataFrame(transformed)
-        buffer = io.BytesIO()
-        pq.write_table(pa.Table.from_pandas(weather_df), buffer)
-        buffer.seek(0)
 
-        s3_hook.load_bytes(
-            bytes_data=buffer.read(),
-            key=f"{partition_key}/bbss_forecast.parquet",
-            bucket_name=bucket_name,
-            replace=True,
+        wr.s3.to_parquet(
+            df=weather_df,
+            path=f"s3://{bucket_name}/{partition_key}/bbss_forecast.parquet",
         )
         logger.info("Parquet file successfully uploaded to S3")
     except Exception as e:
