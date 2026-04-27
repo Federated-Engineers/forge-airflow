@@ -1,10 +1,11 @@
-import requests
-from datetime import datetime
-import numpy as np
 import json
 import logging
-import pandas as pd
+from datetime import datetime
+
 import awswrangler as wr
+import numpy as np
+import pandas as pd
+import requests
 from airflow.providers.amazon.aws.hooks.s3 import S3Hook
 from airflow.sdk import Variable
 
