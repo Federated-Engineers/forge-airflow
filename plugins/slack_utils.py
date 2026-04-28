@@ -67,8 +67,9 @@ def slack_success_alert(context):
             {"type": "section", "fields": [
                 {"type": "mrkdwn", "text": f"*DAG:*\n{dag_id}"},
                 {"type": "mrkdwn", "text": f"*Task:*\n{task_id}"},
-                {"type": "mrkdwn", "text": f"*Run ID:*\n{run_id}"}, 
-                {"type": "mrkdwn", "text": f"*Execution Time:*\n{execution_time}"}
+                {"type": "mrkdwn", "text": f"*Run ID:*\n{run_id}"},
+                {"type": "mrkdwn", 
+                 "text": f"*Execution Time:*\n{execution_time}"}
             ]},
             {"type": "section",
              "text": {

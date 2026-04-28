@@ -26,22 +26,22 @@ with DAG(
 ) as dag:
 
     fetch_task = PythonOperator(
-        task_id='_fetch', 
+        task_id='_fetch',
         python_callable=fetch
     )
 
     dump_raw_json_task = PythonOperator(
-        task_id='_dump_raw', 
+        task_id='_dump_raw',
         python_callable=dump_raw_json
     )
 
     transform_task = PythonOperator(
-        task_id='_transform', 
+        task_id='_transform',
         python_callable=transform
     )
 
     send_transformed_parquet_task = PythonOperator(
-        task_id='_send_parquet', 
+        task_id='_send_parquet',
         python_callable=send_transformed_parquet
     )
 
