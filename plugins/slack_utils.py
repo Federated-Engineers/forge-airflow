@@ -15,18 +15,25 @@ def slack_failure_alert(context):
     log_url = getattr(ti, "log_url", "N/A")
 
     message = {
-        "text": f":rotating_light: *Pipeline Task Failed!*",
+        "text": ":rotating_light: *Pipeline Task Failed!*",
         "blocks": [
-            {"type": "section", "text": {"type": "mrkdwn", "text": f":rotating_light: *Airflow Task Failed!*"}},
+            {"type": "section", 
+            "text": {
+                "type": "mrkdwn", 
+                "text": ":rotating_light: *Airflow Task Failed!*"}},
             {"type": "section", "fields": [
                 {"type": "mrkdwn", "text": f"*DAG:*\n{dag_id}"},
                 {"type": "mrkdwn", "text": f"*Task:*\n{task_id}"},
                 {"type": "mrkdwn", "text": f"*Run ID:*\n{run_id}"},
                 {"type": "mrkdwn", "text": f"*Try:*\n{try_number}"},
-                {"type": "mrkdwn", "text": f"*Execution Time:*\n{execution_time}"},
+                {"type": "mrkdwn", 
+                "text": f"*Execution Time:*\n{execution_time}"},
                 {"type": "mrkdwn", "text": f"*Error:*\n{error}"}
             ]},
-            {"type": "section", "text": {"type": "mrkdwn", "text": f"<{log_url}|View Logs>"}}
+            {"type": "section", 
+            "text": {
+                "type": "mrkdwn", 
+                "text": f"<{log_url}|View Logs>"}}
         ]
     }
 
@@ -35,9 +42,12 @@ def slack_failure_alert(context):
     response = requests.post(webhook, json=message)
 
     if response.status_code not in (200, 201):
-        logging.error(f"Failed to send Slack notification: {response.status_code} {response.text}")
+        logging.error(
+            "Failed to send Slack notification: "
+            f"{response.status_code} {response.text}")
     else:
         logging.info("Slack notification sent successfully")
+
 
 def slack_success_alert(context):
     ti = context["task_instance"]
@@ -48,16 +58,22 @@ def slack_success_alert(context):
     log_url = ti.log_url
 
     message = {
-        "text": f":white_check_mark: *Pipeline Task Succeeded!*",
+        "text": ":white_check_mark: *Pipeline Task Succeeded!*",
         "blocks": [
-            {"type": "section", "text": {"type": "mrkdwn", "text": ":white_check_mark: *Airflow Task Succeeded!*"}},
+            {"type": "section", 
+            "text": {
+                "type": "mrkdwn", 
+                "text": ":white_check_mark: *Airflow Task Succeeded!*"}},
             {"type": "section", "fields": [
                 {"type": "mrkdwn", "text": f"*DAG:*\n{dag_id}"},
                 {"type": "mrkdwn", "text": f"*Task:*\n{task_id}"},
                 {"type": "mrkdwn", "text": f"*Run ID:*\n{run_id}"},
 		{"type": "mrkdwn", "text": f"*Execution Time:*\n{execution_time}"}
             ]},
-            {"type": "section", "text": {"type": "mrkdwn", "text": f"<{log_url}|View Logs>"}}
+                {"type": "section", 
+                "text": {
+                    "type": "mrkdwn", 
+                    "text": f"<{log_url}|View Logs>"}}
         ]
     }
 
@@ -66,6 +82,8 @@ def slack_success_alert(context):
     resp = requests.post(webhook, json=message)
 
     if resp.status_code not in (200, 201):
-        logging.error(f"Slack SUCCESS alert failed: {resp.status_code} {resp.text}")
+        logging.error(
+            "Slack SUCCESS alert failed: "
+            f"{resp.status_code} {resp.text}")
     else:
         logging.info("Slack SUCCESS notification sent successfully")
