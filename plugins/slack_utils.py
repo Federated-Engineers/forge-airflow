@@ -17,22 +17,22 @@ def slack_failure_alert(context):
     message = {
         "text": ":rotating_light: *Pipeline Task Failed!*",
         "blocks": [
-            {"type": "section", 
-            "text": {
-                "type": "mrkdwn", 
-                "text": ":rotating_light: *Airflow Task Failed!*"}},
+            {"type": "section",
+             "text": {
+                 "type": "mrkdwn",
+                 "text": ":rotating_light: *Airflow Task Failed!*"}},
             {"type": "section", "fields": [
                 {"type": "mrkdwn", "text": f"*DAG:*\n{dag_id}"},
                 {"type": "mrkdwn", "text": f"*Task:*\n{task_id}"},
                 {"type": "mrkdwn", "text": f"*Run ID:*\n{run_id}"},
                 {"type": "mrkdwn", "text": f"*Try:*\n{try_number}"},
-                {"type": "mrkdwn", 
-                "text": f"*Execution Time:*\n{execution_time}"},
+                {"type": "mrkdwn",
+                 "text": f"*Execution Time:*\n{execution_time}"},
                 {"type": "mrkdwn", "text": f"*Error:*\n{error}"}
             ]},
-            {"type": "section", 
-            "text": {
-                "type": "mrkdwn", 
+            {"type": "section",
+             "text": {
+                "type": "mrkdwn",
                 "text": f"<{log_url}|View Logs>"}}
         ]
     }
@@ -60,20 +60,20 @@ def slack_success_alert(context):
     message = {
         "text": ":white_check_mark: *Pipeline Task Succeeded!*",
         "blocks": [
-            {"type": "section", 
-            "text": {
-                "type": "mrkdwn", 
+            {"type": "section",
+             "text": {
+                "type": "mrkdwn",
                 "text": ":white_check_mark: *Airflow Task Succeeded!*"}},
             {"type": "section", "fields": [
                 {"type": "mrkdwn", "text": f"*DAG:*\n{dag_id}"},
                 {"type": "mrkdwn", "text": f"*Task:*\n{task_id}"},
-                {"type": "mrkdwn", "text": f"*Run ID:*\n{run_id}"},
-		{"type": "mrkdwn", "text": f"*Execution Time:*\n{execution_time}"}
+                {"type": "mrkdwn", "text": f"*Run ID:*\n{run_id}"}, 
+                {"type": "mrkdwn", "text": f"*Execution Time:*\n{execution_time}"}
             ]},
-                {"type": "section", 
-                "text": {
-                    "type": "mrkdwn", 
-                    "text": f"<{log_url}|View Logs>"}}
+            {"type": "section",
+             "text": {
+                 "type": "mrkdwn",
+                 "text": f"<{log_url}|View Logs>"}}
         ]
     }
 

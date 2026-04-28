@@ -1,6 +1,5 @@
 import json
 import logging
-from datetime import datetime
 
 import awswrangler as wr
 import numpy as np
@@ -38,7 +37,7 @@ def get_forecast() -> dict:
     if response.status_code != 200:
         error = response.json()["error"]
         logger.error(f"WeatherAPI error {error['code']}: {error['message']}")
-        raise Exception(f"WeatherAPI error {error['code']}: {error['message']}")
+        raise Exception(f"API error {error['code']}: {error['message']}")
 
     forecast = response.json()
     tomorrow_hours = forecast['forecast']['forecastday'][1]['hour']
@@ -46,24 +45,24 @@ def get_forecast() -> dict:
     return tomorrow_hours
 
 
-def dump_json_to_s3(nextday_forecast: list, bucket_name: str, partition_key: str):
+def dump_json_to_s3(nextday_forecast: list, bucket_name: str, s3_key: str):
     """
     Serializes the raw forecast data as JSON and uploads it to S3.
 
     Args:
         nextday_forecast (list): List of hourly forecast records to upload.
         bucket_name (str): The target S3 bucket name.
-        partition_key (str): The S3 key prefix for the partitioned path.
+        s3_key (str): The S3 key prefix for the partitioned path.
 
     Raises:
         Exception: If the upload to S3 fails.
     """
 
-    logger.info(f"Raw JSON sent to s3://{bucket_name}/{partition_key}")
+    logger.info(f"Sending Raw JSON to s3://{bucket_name}/{s3_key}")
     try:
         s3_hook.load_string(
             string_data=json.dumps(nextday_forecast),
-            key=f"{partition_key}/bbss_forecast.json",
+            key=f"{s3_key}/bbss_forecast.json",
             bucket_name=bucket_name,
             replace=True,
         )
@@ -103,14 +102,14 @@ def transform_forecast(nextday_forecast: list) -> list:
     return flat_data
 
 
-def send_parquet_to_s3(transformed: list, bucket_name: str,  partition_key: str):
+def send_parquet_to_s3(transformed: list, bucket_name: str,  s3_key: str):
     """
     Converts transformed forecast records to Parquet format and uploads to S3.
 
     Args:
         transformed (list): List of transformed forecast records.
         bucket_name (str): The target S3 bucket name.
-        partition_key (str): The S3 key prefix for the partitioned path.
+        s3_key (str): The S3 key prefix for the partitioned path.
 
     Raises:
         Exception: If the Parquet conversion or S3 upload fails.
@@ -122,9 +121,9 @@ def send_parquet_to_s3(transformed: list, bucket_name: str,  partition_key: str)
 
         wr.s3.to_parquet(
             df=weather_df,
-            path=f"s3://{bucket_name}/{partition_key}/bbss_forecast.parquet",
+            path=f"s3://{bucket_name}/{s3_key}/bbss_forecast.parquet",
         )
-        logger.info("Parquet sent to s3://{bucket_name}/{partition_key}")
+        logger.info("Parquet sent to s3://{bucket_name}/{s3_key}")
     except Exception as e:
         logger.error(f"Failed to upload Parquet to S3: {e}")
         raise
