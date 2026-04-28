@@ -38,4 +38,3 @@ def send_transformed_parquet(**kwargs):
     date_str = nextday_forecast[0]['time'].split(' ')[0]
     key = hive_partitioned_bucket_setup("transformed", date_str)
     send_parquet_to_s3(transformed, bucket_name, key)
-    
