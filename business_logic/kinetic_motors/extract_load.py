@@ -45,5 +45,6 @@ def extract_load_portugal(spreadsheet_id, sheetname):
 
         loaded_files.append(file_key)
         Variable.set(VARIABLE_KEY, json.dumps(loaded_files))
+        log.info(f"Writing {len(df)} rows to sheet {sheetname}")
 
         log.info(f"Successfully loaded {file_key}, {len(df)} rows updated")
