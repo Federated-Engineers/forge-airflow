@@ -32,7 +32,6 @@ def extract_load_portugal(spreadsheet_id, sheetname):
     ).get("Contents", [])
 
     loaded_files = json.loads(Variable.get(VARIABLE_KEY, default="[]"))
-    log.info(f"Writing to sheet: {spreadsheet_id} | {sheetname}")
 
     for file in all_files:
         file_key = file["Key"]
@@ -41,13 +40,7 @@ def extract_load_portugal(spreadsheet_id, sheetname):
             log.info(f"{file_key} already loaded, skipping.")
             continue
 
-        df = extract_portugal(file_key)
-        write_df_to_sheet(df, spreadsheet_id, sheetname)
-        loaded_files.append(file_key)
-        Variable.set(VARIABLE_KEY, json.dumps(loaded_files))
-        log.info(f'Successfully loaded {file_key}, {len(df)} rows updated')
         df = extract_portugal(file_key, bucket)
-        log.info(f"Writing to sheet: {spreadsheet_id} | {sheetname}")
         write_df_to_sheet(df, spreadsheet_id, sheetname, google_cred)
 
         loaded_files.append(file_key)
