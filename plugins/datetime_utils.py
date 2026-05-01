@@ -7,5 +7,5 @@ def get_today_date() -> date:
     Returns:
         Today's date in the format YYYY-MM-DD
     '''
-    partition_date = date.today().strftime("%Y-%m-%d")
-    return partition_date
+    today_date = date.today().strftime("%Y-%m-%d")
+    return today_date
