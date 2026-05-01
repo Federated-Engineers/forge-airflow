@@ -4,8 +4,7 @@ from airflow import DAG
 from airflow.operators.python import PythonOperator
 from pendulum import datetime as pendulum_datetime
 
-from business_logic.bbss_weather_forecast.tasks import (
-    dump_raw_json, fetch, send_transformed_parquet, transform)
+from business_logic.bbss_weather_forecast.tasks import fetch, send_as_parquet
 from plugins.slack_utils import slack_failure_alert, slack_success_alert
 
 default_args = {
@@ -30,24 +29,9 @@ with DAG(
         python_callable=fetch
     )
 
-    dump_raw_json_task = PythonOperator(
-        task_id='_dump_raw',
-        python_callable=dump_raw_json
-    )
-
-    transform_task = PythonOperator(
-        task_id='_transform',
-        python_callable=transform
-    )
-
-    send_transformed_parquet_task = PythonOperator(
+    send_parquet_task = PythonOperator(
         task_id='_send_parquet',
-        python_callable=send_transformed_parquet
+        python_callable=send_as_parquet
     )
 
-    (
-        fetch_task
-        >> dump_raw_json_task
-        >> transform_task
-        >> send_transformed_parquet_task
-    )
+    fetch_task.set_downstream(send_parquet_task)
