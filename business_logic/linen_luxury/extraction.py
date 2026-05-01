@@ -1,49 +1,51 @@
+import logging
+
 import pandas as pd
 from airflow.models import Variable
-from airflow.providers.postgres.hooks.postgres import PostgresHook
 
+from plugins.database import get_postgres_data
 from plugins.google_sheets import (authenticate_google_sheet,
                                    get_google_sheet_records)
+
+logger = logging.getLogger(__name__)
 
 
 def postgress_extraction():
     """
     Extracts data from Postgres database using internal modules.
     """
-    # 1. Postgres Extraction
-    pg_hook = PostgresHook(postgres_conn_id="supabase_postgres")
-    pg_data = pg_hook.get_pandas_df(
-        sql="SELECT * FROM historical.liffey_luxury_order_transactions"
-    )
+    query = "SELECT * FROM historical.liffey_luxury_order_transactions"
 
-    postgres_data = pd.DataFrame(pg_data)
+    logger.info("Starting Postgress Extraction from supabase")
+    postgres_data = get_postgres_data(conn_id="supabase_postgres", query=query)
+    logger.info(
+        f"Successfully extracted {len(postgres_data)} rows from supabase"
+    )
 
     return postgres_data
 
 
-def google_extraction():
+def google_sheet_extraction():
     """
     Extracts data from Google Sheet.
     """
-    # scopes for Google Sheets
+
     scopes = ["https://www.googleapis.com/auth/spreadsheets.readonly"]
 
-    # Use the existing module to authenticate
-    client = authenticate_google_sheet(scopes)
-    sheet_config = Variable.get(
-        "LINEN_LUXURY_SHEET_CONFIG",
-        deserialize_json=True
-    )
+    logger.info("Starting google sheets extraction....")
 
-    # Get IDs from Airflow Variables
+    client = authenticate_google_sheet(scopes)
+    sheet_config = Variable.get("LINEN_LUXURY_SHEET_CONFIG",
+                                deserialize_json=True)
+
     sheet_id = sheet_config.get("sheet_id").strip()
     tab_name = sheet_config.get("tab_name").strip()
 
-    # Use the existing module to fetch data
-    # This returns a List of Dictionaries
     records = get_google_sheet_records(client, sheet_id, tab_name)
 
-    # Convert to DataFrame
     google_data = pd.DataFrame(records)
+    logger.info(
+        f"Sucessfully extracted {len(google_data)} rows of data."
+    )
 
     return google_data
