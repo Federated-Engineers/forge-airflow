@@ -68,9 +68,7 @@ def send_parquet_to_s3(
         flat['time'] = hour['time'].split(' ')[1]
         flat_data.append(flat)
     logger.info(f"Flattening complete — {len(flat_data)} records ready")
-    
-    s3_path = f"s3://{bucket_name}/{s3_key}/bbss-weather{stripped_dt}.parquet"
-    
+    s3_path = f"s3://{bucket_name}/{s3_key}/bbss-weather{stripped_dt}.parquet"    
     logger.info(f"Converting {len(flat_data)} records to Parquet")
     try:
         weather_df = pd.DataFrame(flat_data)
