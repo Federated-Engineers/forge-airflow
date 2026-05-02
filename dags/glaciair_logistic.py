@@ -1,6 +1,7 @@
+from datetime import datetime, timedelta
+
 from airflow.providers.standard.operators.python import PythonOperator
 from airflow.sdk import DAG
-from pendulum import datetime
 
 from business_logic.glaciair_logistic.consolidate_glaciair_data import \
     load_gsheet_to_s3
@@ -8,7 +9,7 @@ from business_logic.glaciair_logistic.consolidate_glaciair_data import \
 default_args = {
     "owner": "Federated-Engineers",
     "retries": 2,
-    "retry_delay": datetime.timedelta(seconds=10)
+    "retry_delay": timedelta(seconds=10)
 }
 
 with DAG(

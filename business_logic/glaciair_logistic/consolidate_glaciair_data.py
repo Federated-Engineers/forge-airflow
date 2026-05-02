@@ -4,10 +4,10 @@ import awswrangler as wr
 import pandas as pd
 from airflow.models import Variable
 
+from plugins.datetime_utils import get_today_date
 from plugins.google_sheets import (authenticate_google_sheet,
                                    get_google_sheet_records)
 from plugins.logger import log
-from plugins.partition_date import get_today_date
 
 glaciair_variables = Variable.get("GLACIAIR_LOGISTICS", deserialize_json=True)
 
@@ -40,7 +40,7 @@ def load_gsheet_to_s3():
 
         log.info(f"{gsheet_name} data extracted from google sheet")
 
-        s3_path = os.path.join(
+        s3_file_path = os.path.join(
             "s3://",
             s3_bucket,
             s3_prefix,
@@ -49,9 +49,13 @@ def load_gsheet_to_s3():
         )
 
         wr.s3.to_parquet(
-            df=sheet_df, path=s3_path, index=False
-            )
+            df=sheet_df,
+            path=s3_file_path,
+            dataset=True,
+            mode="overwrite",
+            index=False
+        )
 
         log.info(
-            f"Data {gsheet_name} written to s3 path {s3_path}!!"
+            f"Data {gsheet_name} written to s3 path {s3_file_path}!!"
             )
