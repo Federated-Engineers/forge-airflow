@@ -13,7 +13,9 @@ dag = DAG(
 
 
 run_etl_script_to_s3 = PythonOperator(
-    task_id="run_all_scripts", python_callable=run_all_scripts, dag=dag
+    task_id="run_all_scripts",
+    python_callable=run_all_scripts,
+    dag=dag
 )
 
 run_etl_script_to_s3
