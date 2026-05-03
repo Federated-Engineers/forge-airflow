@@ -1,10 +1,12 @@
-from business_logic.linen_luxury.extraction import (google_sheet_extraction,
-                                                    postgress_extraction)
-from business_logic.linen_luxury.load import move_file_s3
+from business_logic.linen_luxury.extraction import (
+    google_sheet_extraction,
+    write_postgres_dataframe,
+)
+from business_logic.linen_luxury.load_data_s3 import move_file_s3
 
 
 def run_all_scripts():
-    postgres_data = postgress_extraction()
+    postgres_data = write_postgres_dataframe()
     google_sheet_data = google_sheet_extraction()
     move_file_s3(
         google_sheet_data,
@@ -12,6 +14,7 @@ def run_all_scripts():
         "influencer_transactions",
     )
     move_file_s3(
-        postgres_data, "lll/influencers_data/orders_data.parquet",
+        postgres_data,
+        "lll/influencers_data/orders_data.parquet",
         "order_transactions"
     )

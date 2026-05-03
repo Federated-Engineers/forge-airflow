@@ -26,8 +26,7 @@ def retrieve_ssm_parameter_value() -> Dict | str:
 
     try:
         return json.loads(value)
-    except (json.JSONDecodeError,
-    ValueError) as e:
+    except (json.JSONDecodeError, ValueError) as e:
         log.info(f"Could not parse SSM parameter as JSON. ERROR {str(e)}")
         pass
 
@@ -36,8 +35,7 @@ def retrieve_ssm_parameter_value() -> Dict | str:
         return json.loads(decoded)
     except Exception as e:
         log.info(
-            f"Could not parse SSM parameter as base64-encoded JSON. "
-            f"ERROR {str(e)}"
+            f"Could not parse SSM as base64-encoded JSON. " f"ERROR {str(e)}"
         )
         pass
 
