@@ -24,7 +24,9 @@ def get_all_records() -> pd.DataFrame:
     worksheet_name = config.get("worksheet_name")
     google_client = authenticate_google_sheet(config["scopes"])
 
-    data = get_google_sheet_records(google_client, spreadsheet_id, worksheet_name)
+    data = get_google_sheet_records(google_client,
+                                    spreadsheet_id,
+                                    worksheet_name)
     records_df = pd.DataFrame(data)
 
     return records_df
@@ -44,7 +46,10 @@ def copy_to_s3(records: pd.DataFrame, dest_bucket: str, dest_key: str) -> None:
     csv_data = records.to_csv(index=False)
 
     s3_hook.load_string(
-        string_data=csv_data, key=dest_key, bucket_name=dest_bucket, replace=True
+        string_data=csv_data,
+        key=dest_key,
+        bucket_name=dest_bucket,
+        replace=True
     )
 
 
@@ -67,5 +72,5 @@ def run_pipeline() -> None:
 
     copy_to_s3(records=data, dest_bucket=config["bucket_name"], dest_key=key)
     log.info(
-        f"Successfully copied {len(data)} rows to " f"{config['bucket_name']}/{key}"
+        f"Copied {len(data)} rows to " f"{config['bucket_name']}/{key}"
     )
