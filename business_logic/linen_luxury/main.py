@@ -1,7 +1,5 @@
-from business_logic.linen_luxury.extraction import (
-    google_sheet_extraction,
-    write_postgres_dataframe,
-)
+from business_logic.linen_luxury.extraction import (google_sheet_extraction,
+                                                    write_postgres_dataframe)
 from business_logic.linen_luxury.load_data_s3 import move_file_s3
 
 

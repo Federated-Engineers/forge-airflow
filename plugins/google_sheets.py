@@ -42,8 +42,7 @@ def get_google_sheet_records(
 
 def get_google_sheet_data(client, sheet_id, tab_name):
     """
-    Generic module to fetch data from a Google Sheet.
-    Can be used by any DAG or script in the system.
+    module to fetch data from a Google Sheet.
     """
     logger.info(f"Fetching data from Sheet: {sheet_id}, Tab: {tab_name}")
 

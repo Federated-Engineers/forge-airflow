@@ -4,7 +4,8 @@ import pandas as pd
 from airflow.models import Variable
 from airflow.providers.amazon.aws.hooks.s3 import S3Hook
 
-from plugins.google_sheets import authenticate_google_sheet, get_google_sheet_records
+from plugins.google_sheets import (authenticate_google_sheet,
+                                   get_google_sheet_records)
 from plugins.logger import log
 
 config = Variable.get("bieler_zeitwerk_config", deserialize_json=True)
