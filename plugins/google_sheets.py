@@ -1,8 +1,11 @@
+import logging
 from typing import Dict, List
 
 import gspread
 from aws import retrieve_ssm_parameter_value
 from google.oauth2.service_account import Credentials
+
+log = logging.getLogger(__name__)
 
 
 def authenticate_google_sheet(scopes: List) -> gspread.Client:
@@ -34,3 +37,26 @@ def get_google_sheet_records(
     """
     sheet = client.open_by_key(spreadsheet_id).worksheet(worksheet_name)
     return sheet.get_all_records()
+
+
+def write_append_df_to_sheet(df, spreadsheet_id, sheetname, google_cred):
+    """
+    Authenticate with Google Sheets API and
+    writes data from a Dataframe to Google Sheet.
+    If the Sheet is empty, adds a header to the first row,
+    else it appends data from the Dataframe to the Sheets.
+    """
+    if df.empty:
+        log.info("No data to write, skipping...")
+        return
+
+    worksheet = google_cred.open_by_key(spreadsheet_id).worksheet(sheetname)
+
+    first_row = worksheet.row_values(1)
+
+    if not first_row:
+        log.info("Sheet is empty, writing headers and data...")
+        worksheet.append_rows([df.columns.tolist()] + df.values.tolist())
+    else:
+        log.info("Sheet has data, appending rows only...")
+        worksheet.append_rows(df.values.tolist())
