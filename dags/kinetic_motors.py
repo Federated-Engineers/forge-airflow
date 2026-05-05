@@ -1,15 +1,12 @@
 from datetime import datetime, timedelta
 
-import json
-from datetime import datetime, timedelta
-
 from airflow import DAG
 from airflow.providers.standard.operators.python import PythonOperator
 from airflow.sdk import Variable
 
 from business_logic.kinetic_motors.extract_load import extract_load_portugal
 
-config = json.loads(Variable.get("km_config"))
+config = Variable.get("km_config", deserialize_json=True)
 
 spreadsheet_id = config["spreadsheet_id"]
 sheetname = config["sheetname"]
