@@ -12,7 +12,7 @@ def move_file_and_register_athena(df, key, tablename):
     s3_bucket = config.get("s3_bucket_name")
     athena_db = config.get("athena_db")
 
-    s3_path = f"s3://{s3_bucket}/{key.rsplit('/', 1)[0]}/"
+    s3_path = f"s3://{s3_bucket}/{key.rsplit('/', 1)[0]}"
 
     wr.s3.to_parquet(
         df=df,
