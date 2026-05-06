@@ -5,7 +5,7 @@ import boto3
 log = logging.getLogger(__name__)
 
 
-def get_s3_files_sorted(bucket: str, folder: str):
+def get_lastest_s3_object(bucket: str, folder: str):
     """
     Retrieve ALL file paths from S3 bucket/folder sorted by LastModified.
 

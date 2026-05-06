@@ -7,7 +7,7 @@ from airflow.sdk import Variable
 
 from plugins.google_sheets import (authenticate_google_sheet,
                                    write_append_df_to_sheet)
-from plugins.s3_plug import get_s3_files_sorted
+from plugins.s3_plug import get_lastest_s3_object
 
 log = logging.getLogger(__name__)
 
@@ -86,7 +86,7 @@ def extract_load_portugal(spreadsheet_id, sheetname):
     log.info(f"Last processed date: {last_processed_date}")
     log.info(f"Backfill date: {backfill_date}")
 
-    files = get_s3_files_sorted(bucket, folder)
+    files = get_lastest_s3_object(bucket, folder)
 
     files_to_process = []
 

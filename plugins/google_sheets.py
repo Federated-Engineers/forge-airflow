@@ -46,10 +46,6 @@ def write_append_df_to_sheet(df, spreadsheet_id, sheetname, google_cred):
     If the Sheet is empty, adds a header to the first row,
     else it appends data from the Dataframe to the Sheets.
     """
-    if df.empty:
-        log.info("No data to write, skipping...")
-        return
-
     worksheet = google_cred.open_by_key(spreadsheet_id).worksheet(sheetname)
 
     first_row = worksheet.row_values(1)
