@@ -20,7 +20,7 @@ with DAG(
     default_args=default_args,
     tags=["Federated Engineers", "forge", "weather", "calvia"],
 ) as dag:
-    
+
     fetch_task = PythonOperator(
         task_id='_fetch',
         python_callable=fetch
