@@ -2,8 +2,8 @@ from datetime import date, timedelta
 
 from airflow.sdk import Variable
 
-from business_logic.bbss_weather_forecast.ingestion_pipeline import (get_forecast,
-                                                           send_parquet_to_s3)
+from business_logic.bbss_weather_forecast.ingestion_pipeline import (
+    get_forecast, send_parquet_to_s3)
 from plugins.aws import hive_partitioned_bucket_setup
 
 bbss_s3_bucket = Variable.get("BUCKET_NAME")
