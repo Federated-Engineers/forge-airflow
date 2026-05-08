@@ -23,7 +23,7 @@ def get_forecast(target_date) -> dict:
     params = {
         "key": config.get("API_KEY"),
         "q": config.get("LOCATION"),
-        "dt":str(target_date),
+        "dt": str(target_date),
         "days": 1,
         "aqi": "yes",
         "alerts": "yes"
@@ -39,7 +39,7 @@ def get_forecast(target_date) -> dict:
     forecast = response.json()
     hours = forecast['forecast']['forecastday'][0]['hour']
     logger.info(f"Successfully fetched {len(hours)} hourly records")
-    return hours     
+    return hours
 
 
 def send_parquet_to_s3(
