@@ -13,9 +13,9 @@ def fetch(**context):
     ds = context["ds"]
     execution_date = date.fromisoformat(ds)
     target_date = execution_date + timedelta(days=1)
-    
+
     nextday_forecast = get_forecast(target_date)
-    
+
     context['ti'].xcom_push(key='nextday_forecast', value=nextday_forecast)
     context['ti'].xcom_push(key='target_date', value=str(target_date))
 
@@ -26,7 +26,7 @@ def send_as_parquet(**context):
     target_date = ti.xcom_pull(key='target_date', task_ids='_fetch')
 
     bucket_name = bbss_s3_bucket
-    
+
     date_str = str(target_date)
     stripped_dt = date_str.replace('-', '')
     key = hive_partitioned_bucket_setup("bbss_forecast", date_str)
