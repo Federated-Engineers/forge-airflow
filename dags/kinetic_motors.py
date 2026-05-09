@@ -2,7 +2,6 @@ from datetime import datetime, timedelta
 
 from airflow import DAG
 from airflow.providers.standard.operators.python import PythonOperator
-from airflow.sdk import Variable
 
 from business_logic.kinetic_motors.extract_load import extract_load_portugal
 
