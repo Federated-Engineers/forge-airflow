@@ -48,6 +48,8 @@ def extract_load_portugal(spreadsheet_id, sheetname):
     bucket = config["bucket"]
     folder = config["folder"]
     scopes = config["scopes"]
+    spreadsheet_id = config["spreadsheet_id"]
+    sheetname = config["sheetname"]
 
     google_cred = authenticate_google_sheet(scopes)
 
@@ -127,8 +129,8 @@ def extract_load_portugal(spreadsheet_id, sheetname):
         df = df[
             df["plant_country"].str.strip().str.upper() == "PORTUGAL"]
         if df.empty:
-            log.warning(f"No Portugal data in {s3_path}")
-            continue
+            log.warning(f"No Portugal data found in {s3_path}")
+            raise ValueError(f"No Portugal data found in {s3_path}")
 
         df["transaction_id"] = df["transaction_id"].astype(str)
         df["date"] = df["date"].astype(str)

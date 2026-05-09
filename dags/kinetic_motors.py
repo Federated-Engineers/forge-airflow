@@ -6,11 +6,6 @@ from airflow.sdk import Variable
 
 from business_logic.kinetic_motors.extract_load import extract_load_portugal
 
-config = Variable.get("km_config", deserialize_json=True)
-
-spreadsheet_id = config["spreadsheet_id"]
-sheetname = config["sheetname"]
-
 default_args = {
     "owner": "Federated-Engineers",
     'depends_on_past': False,
@@ -31,8 +26,4 @@ with DAG(
     extract_load_portugal = PythonOperator(
         task_id="extract_load_to_sheet",
         python_callable=extract_load_portugal,
-        op_kwargs={
-            "spreadsheet_id": spreadsheet_id,
-            "sheetname": sheetname,
-        },
     )
