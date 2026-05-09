@@ -7,7 +7,7 @@ from airflow.sdk import Variable
 
 from plugins.google_sheets import (authenticate_google_sheet,
                                    write_append_df_to_sheet)
-from plugins.s3_plug import get_lastest_s3_object
+from plugins.s3_helper import get_lastest_s3_object
 
 log = logging.getLogger(__name__)
 
