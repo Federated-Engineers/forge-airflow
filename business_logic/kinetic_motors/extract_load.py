@@ -23,7 +23,7 @@ def extract_date_from_path(s3_path: str) -> str:
     return s3_path.split("_")[-1].replace(".parquet", "")
 
 
-def extract_load_portugal(spreadsheet_id, sheetname):
+def extract_load_portugal():
     """
     Extracts Portugal data from S3 parquet files and loads it
     into a Google Sheet.
