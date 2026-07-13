@@ -4,8 +4,7 @@ from datetime import datetime
 import awswrangler as wr
 import pandas as pd
 
-from business_logic.scardinavas.config import date_columns
-from business_logic.scardinavas.config import gsheet_ids
+from business_logic.scardinavas.config import date_columns, gsheet_ids
 from plugins.gspread_auth import get_data
 
 logger = logging.getLogger(__name__)
