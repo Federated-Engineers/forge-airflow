@@ -1,16 +1,15 @@
 import logging
+from datetime import datetime  # noqa: E402
 
 import awswrangler as wr
 import pandas as pd
 
-wr.engine.set("python")
-from datetime import datetime  # noqa: E402
-
-from business_logic.scardinavas.config import (date_columns,  # noqa: E402
-                                               gsheet_ids)
+from business_logic.scardinavas.config import date_columns  # noqa: E402
+from business_logic.scardinavas.config import gsheet_ids
 from plugins.gspread_auth import get_data  # noqa: E402
 
 logger = logging.getLogger(__name__)
+wr.engine.set("python")
 
 
 bucket_name = "amz-s3-glue-athena-test"
