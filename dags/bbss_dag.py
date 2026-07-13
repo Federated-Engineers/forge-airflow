@@ -41,4 +41,3 @@ with DAG(
     )
 
     extract >> transform >> analytics
-    

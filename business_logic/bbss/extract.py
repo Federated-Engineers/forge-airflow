@@ -53,4 +53,3 @@ def extract_weather_data():
         )
 
     logger.info("Weather extraction completed successfully.")
-    
