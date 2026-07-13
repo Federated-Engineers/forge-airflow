@@ -1,10 +1,9 @@
-from airflow import DAG
-from airflow.operators.python import PythonOperator
 from datetime import datetime, timedelta
 
+from airflow import DAG
+from airflow.operators.python import PythonOperator
+
 from business_logic.scardinavas.pipeline import run_load, run_processed_load
-
-
 
 default_args = {
     "owner": "anthony",
