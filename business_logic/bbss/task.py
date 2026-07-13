@@ -23,3 +23,4 @@ def analytics_task():
     Run the analytics task.
     """
     build_weather_analytics()
+    

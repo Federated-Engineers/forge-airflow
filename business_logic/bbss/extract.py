@@ -2,19 +2,11 @@ import logging
 
 import requests
 
-from business_logic.bbss.config import (
-    BUCKET_NAME,
-    FORECAST_DAYS,
-    LOCATIONS,
-    RAW_PREFIX,
-    SSM_PARAMETER_NAME,
-    WEATHER_API_URL,
-)
+from business_logic.bbss.config import (BUCKET_NAME, FORECAST_DAYS, LOCATIONS,
+                                        RAW_PREFIX, SSM_PARAMETER_NAME,
+                                        WEATHER_API_URL)
 from plugins.aws_helper import get_ssm_parameter
-from plugins.date_utils import (
-    date_partition_path,
-    get_current_datetime,
-)
+from plugins.date_utils import date_partition_path, get_current_datetime
 from plugins.s3_helper import write_json
 
 logger = logging.getLogger(__name__)
@@ -61,3 +53,4 @@ def extract_weather_data():
         )
 
     logger.info("Weather extraction completed successfully.")
+    

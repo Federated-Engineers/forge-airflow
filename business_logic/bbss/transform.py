@@ -2,22 +2,12 @@ import logging
 
 import pandas as pd
 
-from business_logic.bbss.config import (
-    BUCKET_NAME,
-    LOCATIONS,
-    RAW_PREFIX,
-    TRANSFORMED_PREFIX,
-)
-from plugins.date_utils import (
-    date_partition_path,
-    get_current_datetime,
-    get_partitioned_date,
-)
+from business_logic.bbss.config import (BUCKET_NAME, LOCATIONS, RAW_PREFIX,
+                                        TRANSFORMED_PREFIX)
+from plugins.date_utils import (date_partition_path, get_current_datetime,
+                                get_partitioned_date)
 from plugins.pandas_helper import add_ingestion_timestamp
-from plugins.s3_helper import (
-    read_json,
-    write_dataframe_to_s3_glue,
-)
+from plugins.s3_helper import read_json, write_dataframe_to_s3_glue
 
 logger = logging.getLogger(__name__)
 

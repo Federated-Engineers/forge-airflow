@@ -10,3 +10,5 @@ def add_ingestion_timestamp(df: pd.DataFrame) -> pd.DataFrame:
     df["ingestion_timestamp"] = pd.Timestamp.now(tz="UTC")
 
     return df
+
+
