@@ -4,10 +4,11 @@ import awswrangler as wr
 import pandas as pd
 
 wr.engine.set("python")
-from datetime import datetime
+from datetime import datetime  # noqa: E402
 
-from business_logic.scardinavas.config import date_columns, gsheet_ids
-from plugins.gspread_auth import get_data
+from business_logic.scardinavas.config import (date_columns,  # noqa: E402
+                                               gsheet_ids)
+from plugins.gspread_auth import get_data  # noqa: E402
 
 logger = logging.getLogger(__name__)
 
@@ -105,3 +106,4 @@ run_load(logical_date=datetime.now())
 
 if __name__ == "__main__":
     run_processed_load(logical_date=datetime(2026, 7, 1))
+    

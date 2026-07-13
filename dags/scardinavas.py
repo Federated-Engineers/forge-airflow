@@ -33,3 +33,4 @@ with DAG(
     )
 
     extract_and_load_raw_task >> transform_and_load_partition_task
+    
