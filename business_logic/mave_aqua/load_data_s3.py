@@ -4,24 +4,16 @@ from airflow.models import Variable
 
 def save_raw_to_s3(df, filename):
     """
-    Saves the unmodified raw DataFrame as a single flat Parquet file 
+    Saves the unmodified raw DataFrame as a single flat Parquet file
     in the 'raw_files' folder.
     """
     s3_bucket = Variable.get("S3_BUCKET_NAME")
-    
-    
+
     raw_path = f"s3://{s3_bucket}/raw_files/{filename}"
     print(f"Uploading raw file to: {raw_path}")
-    
-    
-    wr.s3.to_parquet(
-        df=df,
-        path=raw_path,
-        dataset=False,
-        compression="snappy"
-    )
-    print(f"Raw Parquet file successfully saved: {filename}")
 
+    wr.s3.to_parquet(df=df, path=raw_path, dataset=False, compression="snappy")
+    print(f"Raw Parquet file successfully saved: {filename}")
 
 
 def move_file_and_register_athena(df, key, tablename, partition_cols=None):
@@ -48,7 +40,7 @@ def move_file_and_register_athena(df, key, tablename, partition_cols=None):
         mode="overwrite",
         index=False,
         compression="snappy",
-        partition_cols=partition_cols
+        partition_cols=partition_cols,
     )
 
     print(f"Dataset uploaded and registered in {athena_db}.{tablename}")
