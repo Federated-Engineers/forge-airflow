@@ -4,15 +4,12 @@ from datetime import datetime
 import awswrangler as wr
 import pandas as pd
 
-from business_logic.scardinavas.config import date_columns, gsheet_ids
+from business_logic.scardinavas.config import (date_columns, gsheet_ids,
+                                               bucket_name, glue_database)
 from plugins.gspread_auth import get_data
 
 logger = logging.getLogger(__name__)
 wr.engine.set("python")
-
-
-bucket_name = "amz-s3-glue-athena-test"
-glue_database = "scardinavas_db"
 
 
 def gdrive_extract():

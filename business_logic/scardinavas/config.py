@@ -9,3 +9,5 @@ date_columns = {
     "shipments": "shipment_date",
     "payments": "payment_date",
 }
+bucket_name = "federated-production-forge-data-engineers-scardinavas-data-lake"
+glue_database = "scardinavas_db"
