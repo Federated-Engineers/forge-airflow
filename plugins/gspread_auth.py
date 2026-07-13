@@ -32,15 +32,18 @@ def get_google_sheets_client(ssm_path: str):
     return gspread.authorize(credentials)
 
 
-
-def get_data(gsheet_id: str, ssm_path: str = GOOGLE_CREDS_SSM_PATH, sheet_name: str = None) -> pd.DataFrame:
+def get_data(gsheet_id: str, ssm_path: str =
+             GOOGLE_CREDS_SSM_PATH, sheet_name: str = None) -> pd.DataFrame:
     """
     Open a Google Sheet by its ID and return its contents as a raw DataFrame.
     """
     gc = get_google_sheets_client(ssm_path)
     workbook = gc.open_by_key(gsheet_id)
 
-    worksheet = workbook.worksheet(sheet_name) if sheet_name else workbook.sheet1
+    if sheet_name:
+        worksheet = workbook.worksheet(sheet_name)
+    else:
+        worksheet = workbook.sheet1
     records = worksheet.get_all_records()
 
     df = pd.DataFrame(records)

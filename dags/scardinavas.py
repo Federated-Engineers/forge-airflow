@@ -15,7 +15,7 @@ default_args = {
 with DAG(
     dag_id="spreadsheets_to_s3_partitioned_pipeline",
     default_args=default_args,
-    description="Extract Google Sheets to raw S3, then transform to processed partitioned S3",
+    description="Extract Sheets to S3, then transform to partitioned S3",
     start_date=datetime(2026, 7, 9),
     schedule=None,
     catchup=False,
@@ -33,4 +33,3 @@ with DAG(
     )
 
     extract_and_load_raw_task >> transform_and_load_partition_task
-    

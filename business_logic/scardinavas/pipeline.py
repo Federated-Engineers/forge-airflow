@@ -1,12 +1,12 @@
 import logging
-from datetime import datetime  # noqa: E402
+from datetime import datetime
 
 import awswrangler as wr
 import pandas as pd
 
-from business_logic.scardinavas.config import date_columns  # noqa: E402
+from business_logic.scardinavas.config import date_columns
 from business_logic.scardinavas.config import gsheet_ids
-from plugins.gspread_auth import get_data  # noqa: E402
+from plugins.gspread_auth import get_data
 
 logger = logging.getLogger(__name__)
 wr.engine.set("python")
@@ -24,6 +24,7 @@ def gdrive_extract():
         logger.info("Loaded %d rows for '%s'", len(df), source_name)
 
     return dataframes
+
 
 data = gdrive_extract()
 
@@ -59,7 +60,6 @@ def run_load(logical_date):
     load_to_s3(dataframes, logical_date)
 
     logger.info("All data loaded successfully to S3.")
-    
 
 
 def create_glue_database():
@@ -70,7 +70,10 @@ def create_glue_database():
 def process_to_partitioned_s3(dataset_name, logical_date):
     extraction_date = logical_date.strftime("%Y-%m-%d")
 
-    raw_path = f"s3://{bucket_name}/raw/{dataset_name}/{dataset_name}_{extraction_date}.csv"
+    raw_path = (
+        f"s3://{bucket_name}/raw/{dataset_name}/"
+        f"{dataset_name}_{extraction_date}.csv"
+    )
     processed_path = f"s3://{bucket_name}/processed/{dataset_name}/"
 
     df = wr.s3.read_csv(path=raw_path, encoding="utf-8")
@@ -100,9 +103,9 @@ def run_processed_load(logical_date):
 
     for dataset_name in ["orders", "shipments", "payments"]:
         process_to_partitioned_s3(dataset_name, logical_date)
-        
+
+
 run_load(logical_date=datetime.now())
 
 if __name__ == "__main__":
     run_processed_load(logical_date=datetime(2026, 7, 1))
-    

@@ -16,6 +16,7 @@ def get_ssm_parameter(ssm_parameter_name: str):
         str: The value of the specified parameter.
     """
     client = boto3.client('ssm', region_name='eu-central-1',)
-    response = client.get_parameter(Name=ssm_parameter_name, WithDecryption=True)
+    response = client.get_parameter(Name=ssm_parameter_name,
+                                    WithDecryption=True)
     ssm_params_value = response['Parameter']['Value']
     return ssm_params_value
