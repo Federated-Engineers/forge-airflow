@@ -69,9 +69,11 @@ def transform_weather_data():
     records = []
 
     for location in locations:
-
         object_key = (
-            f"{RAW_PREFIX}/" f"{location['name']}/" f"{partition_path}/" "weather.json"
+            f"{RAW_PREFIX}/"
+            f"{location['name']}/"
+            f"{partition_path}/"
+            "weather.json"
         )
 
         weather = read_json(
@@ -88,7 +90,9 @@ def transform_weather_data():
 
     df = pd.DataFrame(records)
 
-    df = df.drop_duplicates(subset=["location_name", "forecast_time"])
+    df = df.drop_duplicates(
+        subset=["location_name", "forecast_time"]
+    )
 
     df = add_ingestion_timestamp(df)
 
