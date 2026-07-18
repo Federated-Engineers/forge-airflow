@@ -11,7 +11,7 @@ default_args = {
     "owner": "Federated_engineers",
     "depends_on_past": False,
     "retries": 2,
-    "retry_delay": timedelta(minutes=5),
+    "retry_delay": timedelta(minutes=1),
 }
 
 

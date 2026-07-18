@@ -1,11 +1,19 @@
+import json
 import logging
+from pathlib import Path
 
 import pandas as pd
 
-from business_logic.bbss.config import (BUCKET_NAME, LOCATIONS, RAW_PREFIX,
-                                        TRANSFORMED_PREFIX)
-from plugins.date_utils import (date_partition_path, get_current_datetime,
-                                get_partitioned_date)
+from business_logic.bbss.config import (
+    BUCKET_NAME,
+    RAW_PREFIX,
+    TRANSFORMED_PREFIX,
+)
+from plugins.date_utils import (
+    date_partition_path,
+    get_current_datetime,
+    get_partitioned_date,
+)
 from plugins.pandas_helper import add_ingestion_timestamp
 from plugins.s3_helper import read_json, write_dataframe_to_s3_glue
 
@@ -52,6 +60,13 @@ def transform_weather_data():
     """
     Transform raw weather data into a partitioned dataset.
     """
+    config_path = Path(__file__).parent / "weather_config.json"
+
+    with open(config_path, "r", encoding="utf-8") as file:
+        weather_config = json.load(file)
+
+    locations = weather_config["locations"]
+
     current_datetime = get_current_datetime()
     partition_path = date_partition_path(current_datetime)
 
@@ -59,7 +74,7 @@ def transform_weather_data():
 
     records = []
 
-    for location in LOCATIONS:
+    for location in locations:
 
         object_key = (
             f"{RAW_PREFIX}/"

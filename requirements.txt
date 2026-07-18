@@ -4,5 +4,3 @@ boto3==1.42.79
 isort==7.0.0
 gspread==6.2.1
 apache-airflow[amazon]==3.0.6
-pandas==2.3.2
-requests==2.32.5
