@@ -30,7 +30,7 @@ default_args = {
 
 @dag(
     dag_id=DAG_ID,
-    schedule=None,
+    schedule="0 5 * * *",
     catchup=False,
     default_args=default_args,
     max_active_runs=1,
@@ -100,7 +100,7 @@ def alpenmechanik_load_to_s3():
             df,
             s3_bucket_name,
             s3_key,
-            region=variables.get("S3_BUCKET_REGION") or variables.get("REGION")
+            region=variables.get("REGION")
         )
 
     loads_gsheet_to_s3()
