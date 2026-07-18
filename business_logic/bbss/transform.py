@@ -4,11 +4,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from business_logic.bbss.config import (
-    BUCKET_NAME,
-    RAW_PREFIX,
-    TRANSFORMED_PREFIX,
-)
+from business_logic.bbss.config import BUCKET_NAME, RAW_PREFIX, TRANSFORMED_PREFIX
 from plugins.date_utils import (
     date_partition_path,
     get_current_datetime,
@@ -77,10 +73,7 @@ def transform_weather_data():
     for location in locations:
 
         object_key = (
-            f"{RAW_PREFIX}/"
-            f"{location['name']}/"
-            f"{partition_path}/"
-            "weather.json"
+            f"{RAW_PREFIX}/" f"{location['name']}/" f"{partition_path}/" "weather.json"
         )
 
         weather = read_json(
@@ -97,9 +90,7 @@ def transform_weather_data():
 
     df = pd.DataFrame(records)
 
-    df = df.drop_duplicates(
-        subset=["location_name", "forecast_time"]
-    )
+    df = df.drop_duplicates(subset=["location_name", "forecast_time"])
 
     df = add_ingestion_timestamp(df)
 

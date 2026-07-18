@@ -36,9 +36,7 @@ def extract_weather_data():
 
     for location in locations:
 
-        logger.info(
-            f"Extracting weather data for {location['name']}"
-        )
+        logger.info(f"Extracting weather data for {location['name']}")
 
         response = requests.get(
             weather_api_url,
@@ -53,10 +51,7 @@ def extract_weather_data():
         response.raise_for_status()
 
         object_key = (
-            f"{RAW_PREFIX}/"
-            f"{location['name']}/"
-            f"{partition_path}/"
-            "weather.json"
+            f"{RAW_PREFIX}/" f"{location['name']}/" f"{partition_path}/" "weather.json"
         )
 
         write_json(

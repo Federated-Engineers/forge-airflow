@@ -19,9 +19,7 @@ def get_latest_s3_file(bucket: str, prefix: str):
     if not files:
         raise ValueError(f"No files found in s3://{bucket}/{prefix}")
 
-    logger.info(
-        f"{len(files)} file(s) found in s3://{bucket}/{prefix}"
-    )
+    logger.info(f"{len(files)} file(s) found in s3://{bucket}/{prefix}")
 
     latest_object = max(files, key=lambda x: x["LastModified"])
 
@@ -137,6 +135,4 @@ def read_json(
         Key=object_key,
     )
 
-    return json.loads(
-        response["Body"].read().decode("utf-8")
-    )
+    return json.loads(response["Body"].read().decode("utf-8"))

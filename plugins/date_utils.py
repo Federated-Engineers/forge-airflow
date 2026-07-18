@@ -1,4 +1,3 @@
-
 import logging
 from datetime import datetime, timedelta, timezone
 
@@ -20,9 +19,7 @@ def get_yesterday():
     """
     Return yesterday's date in UTC.
     """
-    return (
-        datetime.now(timezone.utc).date() - timedelta(days=1)
-    ).strftime("%Y-%m-%d")
+    return (datetime.now(timezone.utc).date() - timedelta(days=1)).strftime("%Y-%m-%d")
 
 
 def get_partitioned_date(target_date: str, df: pd.DataFrame):

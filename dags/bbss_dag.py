@@ -4,8 +4,7 @@ from airflow.providers.standard.operators.python import PythonOperator
 from airflow.sdk import DAG
 from pendulum import datetime
 
-from business_logic.bbss.task import (analytics_task, extract_task,
-                                      transform_task)
+from business_logic.bbss.task import analytics_task, extract_task, transform_task
 
 default_args = {
     "owner": "Federated_engineers",
