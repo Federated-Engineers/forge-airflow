@@ -1,23 +1,23 @@
 import datetime
 from typing import Any
 
-from airflow.decorators import dag, get_current_context, task
+from airflow.decorators import dag, task
 from airflow.models import Variable
+from airflow.sdk import get_current_context
 
-from business_logic.google_sheets.sheets import (
-    fetch_worksheet_records,
-    parse_service_account_json,
-)
-from business_logic.google_sheets.storage import (
-    build_landing_key,
-    build_processed_key,
+from business_logic.nordic_peaks.landing import (
     read_snapshot_from_s3,
-    write_processed_parquet,
     write_snapshot_to_s3_if_missing,
 )
-from business_logic.google_sheets.transform import records_to_typed_dataframe
+from business_logic.nordic_peaks.processed import write_processed_parquet
+from business_logic.nordic_peaks.s3_keys import (
+    build_landing_key,
+    build_processed_key,
+)
+from business_logic.nordic_peaks.transform import records_to_typed_dataframe
+from plugins.gspread_auth import GOOGLE_CREDS_SSM_PATH, get_data
 
-DAG_ID = "google-sheets-extract"
+DAG_ID = "NordicPeaks_GoogleSheets_Pipeline"
 
 
 @dag(
@@ -28,6 +28,7 @@ DAG_ID = "google-sheets-extract"
     tags=["google-sheets", "ingestion"],
     max_active_runs=1,
 )
+# Extract Google Sheets data, transform to canonical schema, and write to S3 landing and processed zones.
 def google_sheets_extract_dag():
     @task(task_id="load_sources")
     def load_sources() -> list[dict[str, Any]]:
@@ -35,7 +36,12 @@ def google_sheets_extract_dag():
         if not isinstance(sources, list) or not sources:
             raise ValueError("GSHEETS_SOURCES must be a non-empty JSON array")
 
-        required_fields = {"source", "spreadsheet_id", "worksheet_name"}
+        required_fields = {
+            "source_id",
+            "spreadsheet_id",
+            "worksheet_name",
+            "partition_date_column",
+        }
         for source in sources:
             if not isinstance(source, dict):
                 raise ValueError(
@@ -48,25 +54,26 @@ def google_sheets_extract_dag():
                 )
         return sources
 
-    @task(task_id="extract_snapshot_to_landing")
+    @task(task_id="extract_source_snapshot_to_aws_landing_zone")
     def extract_snapshot_to_landing(source_config: dict[str, Any]) -> dict[str, Any]:
         context = get_current_context()
         run_dt = context["logical_date"].in_timezone("UTC")
 
         lake_bucket = Variable.get(
             "DATA_LAKE_BUCKET", default_var="nordic-peaks-oslo")
-        service_account_json = Variable.get("GSHEETS_SERVICE_ACCOUNT_JSON")
-        service_account_info = parse_service_account_json(service_account_json)
+        creds_ssm_path = Variable.get(
+            "GSHEETS_CREDS_SSM_PATH", default_var=GOOGLE_CREDS_SSM_PATH)
 
-        source = source_config["source"]
+        source = source_config["source_id"]
         spreadsheet_id = source_config["spreadsheet_id"]
         worksheet_name = source_config["worksheet_name"]
 
-        records = fetch_worksheet_records(
-            spreadsheet_id=spreadsheet_id,
-            worksheet_name=worksheet_name,
-            service_account_info=service_account_info,
+        dataframe = get_data(
+            gsheet_id=spreadsheet_id,
+            ssm_path=creds_ssm_path,
+            sheet_name=worksheet_name,
         )
+        records = dataframe.to_dict(orient="records")
 
         landing_key = build_landing_key(source=source, run_dt=run_dt)
         landing_uri = write_snapshot_to_s3_if_missing(
@@ -82,7 +89,9 @@ def google_sheets_extract_dag():
             "landing_uri": landing_uri,
             "year": run_dt.strftime("%Y"),
             "month": run_dt.strftime("%m"),
+            "day": run_dt.strftime("%d"),
         }
+    # transform_landing_to_processed task: read landing snapshot, validate and type, write to processed Parquet.
 
     @task(task_id="transform_landing_to_processed")
     def transform_landing_to_processed(snapshot: dict[str, Any]) -> dict[str, Any]:
@@ -96,17 +105,20 @@ def google_sheets_extract_dag():
         landing_uri = snapshot["landing_uri"]
 
         records = read_snapshot_from_s3(landing_uri)
-        dataframe, athena_types = records_to_typed_dataframe(
+        # Transform to canonical dataframe + semantic type map for Parquet write.
+        dataframe, semantic_types = records_to_typed_dataframe(
             records=records,
-            source_config=source_config,
+            source_config={**source_config, "source": source},
         )
 
-        processed_key = build_processed_key(source=source, run_dt=run_dt)
+        processed_key = build_processed_key()
         processed_uri = write_processed_parquet(
             dataframe=dataframe,
             bucket=lake_bucket,
             key=processed_key,
-            athena_types=athena_types,
+            semantic_types=semantic_types,
+            source=source,
+            partition_date_column=source_config["partition_date_column"],
         )
 
         return {
@@ -116,6 +128,8 @@ def google_sheets_extract_dag():
             "processed_uri": processed_uri,
             "year": snapshot["year"],
             "month": snapshot["month"],
+            "day": snapshot["day"],
+            "partition_date_column": source_config["partition_date_column"],
         }
 
     @task(task_id="log_result")
@@ -126,7 +140,7 @@ def google_sheets_extract_dag():
             f"rows={result['row_count']}, "
             f"landing={result['landing_uri']}, "
             f"processed={result['processed_uri']}, "
-            f"partition={result['year']}-{result['month']}"
+            f"partition_date_column={result['partition_date_column']}"
         )
 
     sources = load_sources()

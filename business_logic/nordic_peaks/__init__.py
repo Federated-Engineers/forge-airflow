@@ -1,1 +1,1 @@
-"""Google Sheets ingestion helpers for the data lake."""
+"""Nordic Peaks Business Logic package for data lake pipeline"""

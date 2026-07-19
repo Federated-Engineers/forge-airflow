@@ -6,8 +6,8 @@ ENV AIRFLOW_HOME=${AIRFLOW_HOME_ARG}
 USER airflow
 ENV PYTHONPATH=${AIRFLOW_HOME}:$PYTHONPATH
 
-COPY requirements.txt /
-RUN pip install  -r /requirements.txt
+COPY requirements-dev.txt /requirements-dev.txt
+RUN pip install -r /requirements-dev.txt
 
 COPY --chown=airflow:airflow dags /opt/airflow/dags
 COPY --chown=airflow:airflow plugins /opt/airflow/plugins
