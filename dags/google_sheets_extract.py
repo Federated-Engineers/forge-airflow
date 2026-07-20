@@ -3,20 +3,15 @@ from typing import Any
 
 from airflow.sdk import Variable, dag, get_current_context, task
 
-from business_logic.nordic_peaks.extract_to_s3 import (
-    get_google_sheets_data,
-    validate_metadata,
-    write_raw_json_to_s3,
-)
+from business_logic.nordic_peaks.extract_to_s3 import (get_google_sheets_data,
+                                                       validate_metadata,
+                                                       write_raw_json_to_s3)
 from business_logic.nordic_peaks.load_processed import write_processed_parquet
 from business_logic.nordic_peaks.read_raw_data import read_raw_data_from_s3
-from business_logic.nordic_peaks.s3_keys import (
-    build_landing_key,
-    build_processed_key,
-)
-from business_logic.nordic_peaks.transform import (
-    transform_data_to_typed_dataframe,
-)
+from business_logic.nordic_peaks.s3_keys import (build_landing_key,
+                                                 build_processed_key)
+from business_logic.nordic_peaks.transform import \
+    transform_data_to_typed_dataframe
 
 DAG_ID = "NordicPeaks_GoogleSheets_Pipeline"
 
