@@ -1,18 +1,22 @@
 import datetime
 from typing import Any
 
-from airflow.sdk import Variable, chain, dag, get_current_context, task
+from airflow.sdk import Variable, dag, get_current_context, task
 
-from business_logic.nordic_peaks.extract_to_s3 import (get_google_sheets_data,
-                                                       validate_metadata,
-                                                       write_raw_json_to_s3)
+from business_logic.nordic_peaks.extract_to_s3 import (
+    get_google_sheets_data,
+    validate_metadata,
+    write_raw_json_to_s3,
+)
 from business_logic.nordic_peaks.load_processed import write_processed_parquet
 from business_logic.nordic_peaks.read_raw_data import read_raw_data_from_s3
-from business_logic.nordic_peaks.s3_keys import (build_landing_key,
-                                                 build_processed_key)
-from business_logic.nordic_peaks.transform import \
-    transform_data_to_typed_dataframe
-from plugins.gspread_auth import GOOGLE_CREDS_SSM_PATH
+from business_logic.nordic_peaks.s3_keys import (
+    build_landing_key,
+    build_processed_key,
+)
+from business_logic.nordic_peaks.transform import (
+    transform_data_to_typed_dataframe,
+)
 
 DAG_ID = "NordicPeaks_GoogleSheets_Pipeline"
 
@@ -25,7 +29,8 @@ DAG_ID = "NordicPeaks_GoogleSheets_Pipeline"
     tags=["google-sheets", "nordic-peaks"],
     max_active_runs=1,
 )
-# Extract Google Sheets data, transform to canonical schema, and write to S3 landing and processed zones.
+# Extract Google Sheets data, transform to canonical schema,
+# and write to S3 landing and processed zones.
 def start_nordic_peaks_pipeline():
     @task(task_id="load_and_validate_sources")
     def load_and_validate_sources() -> list[dict[str, Any]]:
@@ -33,10 +38,10 @@ def start_nordic_peaks_pipeline():
         source_metadata = validate_metadata(sources)
         return source_metadata
 
-
-
     @task(task_id="extract_source_to_aws_landing_zone")
-    def extract_source_to_aws_landing_zone(source_config: dict[str, Any]) -> dict[str, Any]:
+    def extract_source_to_aws_landing_zone(
+        source_config: dict[str, Any],
+    ) -> dict[str, Any]:
         context = get_current_context()
         run_datetime = context["logical_date"].in_timezone("UTC")
         lake_bucket = Variable.get("DATA_LAKE_BUCKET")
@@ -50,7 +55,7 @@ def start_nordic_peaks_pipeline():
             sheet_name=worksheet_name,
         )
 
-        #  convert datafram to dict where each row becomes one dictionary where keys are column names and values are that row’s cell values.
+        # Convert dataframe to row-wise dictionaries for JSON snapshot writes.
         records = dataframe.to_dict(orient="records")
 
         landing_key = build_landing_key(source=source, run_dt=run_datetime)
@@ -69,17 +74,20 @@ def start_nordic_peaks_pipeline():
             "month": run_datetime.strftime("%m"),
             "day": run_datetime.strftime("%d"),
         }
-    
-    # transform_landing_to_processed task: read landing snapshot, validate and type, write to processed Parquet.
+
+    # Read landing snapshot, validate and type, then write processed Parquet.
     @task(task_id="transform_landing_to_processed")
-    def transform_raw_to_processed_zone(raw_payload: dict[str, Any]) -> dict[str, Any]:
+    def transform_raw_to_processed_zone(
+        raw_payload: dict[str, Any],
+    ) -> dict[str, Any]:
         lake_bucket = Variable.get("DATA_LAKE_BUCKET")
         source_config = raw_payload["source_config"]
         source = raw_payload["source"]
         landing_uri = raw_payload["landing_uri"]
 
         raw_data = read_raw_data_from_s3(landing_uri)
-        # Transform to canonical dataframe + semantic type map for Parquet write.
+        # Transform to canonical dataframe plus semantic type map
+        # used by the Parquet writer.
         dataframe, semantic_types = transform_data_to_typed_dataframe(
             raw_data,
             source_config={**source_config, "source": source},
@@ -92,7 +100,9 @@ def start_nordic_peaks_pipeline():
             key=processed_key,
             semantic_types=semantic_types,
             source=source,
-            partition_date_column=source_config["partition_date_column"],
+            partition_date_column=source_config[
+                "partition_date_column"
+            ],
         )
 
         return {
@@ -103,7 +113,9 @@ def start_nordic_peaks_pipeline():
             "year": raw_payload["year"],
             "month": raw_payload["month"],
             "day": raw_payload["day"],
-            "partition_date_column": source_config["partition_date_column"],
+            "partition_date_column": source_config[
+                "partition_date_column"
+            ],
         }
 
     @task(task_id="log_result")
@@ -118,9 +130,13 @@ def start_nordic_peaks_pipeline():
         )
 
     sources = load_and_validate_sources()
-    # dynamic mapping. The expand() functions passes the parameters and creates a parallel task for each.
-    landing_snapshots = extract_source_to_aws_landing_zone.expand(source_config=sources)
-    processed_results = transform_raw_to_processed_zone.expand(raw_payload=landing_snapshots)
+    # Dynamic mapping creates one task instance per source config.
+    landing_snapshots = extract_source_to_aws_landing_zone.expand(
+        source_config=sources
+    )
+    processed_results = transform_raw_to_processed_zone.expand(
+        raw_payload=landing_snapshots
+    )
     log_result.expand(result=processed_results)
 
 

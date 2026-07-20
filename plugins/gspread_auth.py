@@ -1,9 +1,7 @@
 import json
 import logging
 
-logging.basicConfig(level=logging.INFO)
 import gspread
-import pandas as pd
 from google.oauth2.service_account import Credentials
 
 from plugins.aws import get_ssm_parameter
@@ -18,7 +16,9 @@ SCOPES = [
 GOOGLE_CREDS_SSM_PATH = "/production/google-service-account/credentials"
 
 
-def authenticate_airflow(ssm_path: str = GOOGLE_CREDS_SSM_PATH) -> gspread.Client:
+def authenticate_airflow(
+    ssm_path: str = GOOGLE_CREDS_SSM_PATH,
+) -> gspread.Client:
     """
     Authenticate with Google Sheets using credentials stored in AWS SSM.
     """

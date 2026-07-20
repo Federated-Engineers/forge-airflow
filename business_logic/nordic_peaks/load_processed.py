@@ -22,7 +22,8 @@ def write_processed_parquet(
     )
     if partition_dates.isna().any():
         raise ValueError(
-            f"Partition date column '{partition_date_column}' contains invalid dates"
+            "Partition date column "
+            f"'{partition_date_column}' contains invalid dates"
         )
 
     dataframe["source"] = source

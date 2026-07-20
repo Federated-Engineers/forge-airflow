@@ -1,1 +1,1 @@
-"""Nordic Peaks Business Logic package for data lake pipeline"""
+"""Nordic Peaks business logic package for data lake pipeline."""
