@@ -1,10 +1,13 @@
 import json
 import logging
 from typing import Any
-import boto3
+
 import awswrangler as wr
+import boto3
 import pandas as pd
+
 from plugins.gspread_auth import authenticate_airflow
+
 logger = logging.getLogger(__name__)
 
 GOOGLE_CREDS_SSM_PATH = "/production/google-service-account/credentials"
