@@ -1,10 +1,10 @@
 from typing import Any
 
-from business_logic.nordic_peaks.landing import (
+from business_logic.nordic_peaks.extract_to_s3 import (
     read_snapshot_from_s3,
     write_snapshot_to_s3_if_missing,
 )
-from business_logic.nordic_peaks.processed import write_processed_parquet
+from business_logic.nordic_peaks.load_processed import write_processed_parquet
 from business_logic.nordic_peaks.s3_keys import (
     build_landing_key,
     build_processed_key as _build_processed_key,

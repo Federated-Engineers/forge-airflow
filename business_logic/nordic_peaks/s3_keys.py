@@ -8,11 +8,11 @@ def build_landing_key(source: str, run_dt: Any) -> str:
     day = run_dt.strftime("%d")
     hhmm = run_dt.strftime("%H%M")
     return (
-        f"landing/source={source}/year={year}/month={month}/day={day}/"
+        f"landing_zone/source={source}/year={year}/month={month}/day={day}/"
         f"{source}_{hhmm}Z.json"
     )
 
 
 def build_processed_key() -> str:
     """Create the shared processed dataset root path."""
-    return "processed/"
+    return "processed_zone/"

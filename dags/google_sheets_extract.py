@@ -1,21 +1,20 @@
 import datetime
 from typing import Any
-
-from airflow.decorators import dag, task
-from airflow.models import Variable
-from airflow.sdk import get_current_context
-
-from business_logic.nordic_peaks.landing import (
-    read_snapshot_from_s3,
-    write_snapshot_to_s3_if_missing,
+from airflow.sdk import get_current_context, dag, chain, Variable, task
+from business_logic.nordic_peaks.extract_to_s3 import (
+    write_raw_json_to_s3,
+    get_google_sheets_data,
+    validate_metadata
 )
-from business_logic.nordic_peaks.processed import write_processed_parquet
+from business_logic.nordic_peaks.read_raw_data import read_raw_data_from_s3
+from business_logic.nordic_peaks.load_processed import write_processed_parquet
 from business_logic.nordic_peaks.s3_keys import (
     build_landing_key,
     build_processed_key,
 )
-from business_logic.nordic_peaks.transform import records_to_typed_dataframe
-from plugins.gspread_auth import GOOGLE_CREDS_SSM_PATH, get_data
+from business_logic.nordic_peaks.transform import transform_data_to_typed_dataframe
+from plugins.gspread_auth import GOOGLE_CREDS_SSM_PATH
+
 
 DAG_ID = "NordicPeaks_GoogleSheets_Pipeline"
 
@@ -25,58 +24,39 @@ DAG_ID = "NordicPeaks_GoogleSheets_Pipeline"
     start_date=datetime.datetime(2024, 1, 1),
     schedule="0 * * * *",
     catchup=False,
-    tags=["google-sheets", "ingestion"],
+    tags=["google-sheets", "nordic-peaks"],
     max_active_runs=1,
 )
 # Extract Google Sheets data, transform to canonical schema, and write to S3 landing and processed zones.
-def google_sheets_extract_dag():
-    @task(task_id="load_sources")
-    def load_sources() -> list[dict[str, Any]]:
+def start_nordic_peaks_pipeline():
+    @task(task_id="load_and_validate_sources")
+    def load_and_validate_sources() -> list[dict[str, Any]]:
         sources = Variable.get("GSHEETS_SOURCES", deserialize_json=True)
-        if not isinstance(sources, list) or not sources:
-            raise ValueError("GSHEETS_SOURCES must be a non-empty JSON array")
+        source_metadata = validate_metadata(sources)
+        return source_metadata
 
-        required_fields = {
-            "source_id",
-            "spreadsheet_id",
-            "worksheet_name",
-            "partition_date_column",
-        }
-        for source in sources:
-            if not isinstance(source, dict):
-                raise ValueError(
-                    "Each GSHEETS_SOURCES entry must be a JSON object")
-            missing = required_fields - set(source.keys())
-            if missing:
-                missing_fields = ", ".join(sorted(missing))
-                raise ValueError(
-                    f"Source config is missing required fields: {missing_fields}"
-                )
-        return sources
 
-    @task(task_id="extract_source_snapshot_to_aws_landing_zone")
-    def extract_snapshot_to_landing(source_config: dict[str, Any]) -> dict[str, Any]:
+
+    @task(task_id="extract_source_to_aws_landing_zone")
+    def extract_source_to_aws_landing_zone(source_config: dict[str, Any]) -> dict[str, Any]:
         context = get_current_context()
-        run_dt = context["logical_date"].in_timezone("UTC")
-
-        lake_bucket = Variable.get(
-            "DATA_LAKE_BUCKET", default_var="nordic-peaks-oslo")
-        creds_ssm_path = Variable.get(
-            "GSHEETS_CREDS_SSM_PATH", default_var=GOOGLE_CREDS_SSM_PATH)
+        run_datetime = context["logical_date"].in_timezone("UTC")
+        lake_bucket = Variable.get("DATA_LAKE_BUCKET")
 
         source = source_config["source_id"]
         spreadsheet_id = source_config["spreadsheet_id"]
         worksheet_name = source_config["worksheet_name"]
 
-        dataframe = get_data(
+        dataframe = get_google_sheets_data(
             gsheet_id=spreadsheet_id,
-            ssm_path=creds_ssm_path,
             sheet_name=worksheet_name,
         )
+
+        #  convert datafram to dict where each row becomes one dictionary where keys are column names and values are that row’s cell values.
         records = dataframe.to_dict(orient="records")
 
-        landing_key = build_landing_key(source=source, run_dt=run_dt)
-        landing_uri = write_snapshot_to_s3_if_missing(
+        landing_key = build_landing_key(source=source, run_dt=run_datetime)
+        landing_uri = write_raw_json_to_s3(
             records=records,
             bucket=lake_bucket,
             key=landing_key,
@@ -87,27 +67,23 @@ def google_sheets_extract_dag():
             "source": source,
             "row_count": len(records),
             "landing_uri": landing_uri,
-            "year": run_dt.strftime("%Y"),
-            "month": run_dt.strftime("%m"),
-            "day": run_dt.strftime("%d"),
+            "year": run_datetime.strftime("%Y"),
+            "month": run_datetime.strftime("%m"),
+            "day": run_datetime.strftime("%d"),
         }
+    
     # transform_landing_to_processed task: read landing snapshot, validate and type, write to processed Parquet.
-
     @task(task_id="transform_landing_to_processed")
-    def transform_landing_to_processed(snapshot: dict[str, Any]) -> dict[str, Any]:
-        context = get_current_context()
-        run_dt = context["logical_date"].in_timezone("UTC")
-        lake_bucket = Variable.get(
-            "DATA_LAKE_BUCKET", default_var="nordic-peaks-oslo")
+    def transform_raw_to_processed_zone(raw_payload: dict[str, Any]) -> dict[str, Any]:
+        lake_bucket = Variable.get("DATA_LAKE_BUCKET")
+        source_config = raw_payload["source_config"]
+        source = raw_payload["source"]
+        landing_uri = raw_payload["landing_uri"]
 
-        source_config = snapshot["source_config"]
-        source = snapshot["source"]
-        landing_uri = snapshot["landing_uri"]
-
-        records = read_snapshot_from_s3(landing_uri)
+        raw_data = read_raw_data_from_s3(landing_uri)
         # Transform to canonical dataframe + semantic type map for Parquet write.
-        dataframe, semantic_types = records_to_typed_dataframe(
-            records=records,
+        dataframe, semantic_types = transform_data_to_typed_dataframe(
+            raw_data,
             source_config={**source_config, "source": source},
         )
 
@@ -126,9 +102,9 @@ def google_sheets_extract_dag():
             "row_count": len(dataframe),
             "landing_uri": landing_uri,
             "processed_uri": processed_uri,
-            "year": snapshot["year"],
-            "month": snapshot["month"],
-            "day": snapshot["day"],
+            "year": raw_payload["year"],
+            "month": raw_payload["month"],
+            "day": raw_payload["day"],
             "partition_date_column": source_config["partition_date_column"],
         }
 
@@ -143,12 +119,11 @@ def google_sheets_extract_dag():
             f"partition_date_column={result['partition_date_column']}"
         )
 
-    sources = load_sources()
-    landing_snapshots = extract_snapshot_to_landing.expand(
-        source_config=sources)
-    processed_results = transform_landing_to_processed.expand(
-        snapshot=landing_snapshots)
+    sources = load_and_validate_sources()
+    # dynamic mapping. The expand() functions passes the parameters and creates a parallel task for each.
+    landing_snapshots = extract_source_to_aws_landing_zone.expand(source_config=sources)
+    processed_results = transform_raw_to_processed_zone.expand(raw_payload=landing_snapshots)
     log_result.expand(result=processed_results)
 
 
-dag = google_sheets_extract_dag()
+dag = start_nordic_peaks_pipeline()
