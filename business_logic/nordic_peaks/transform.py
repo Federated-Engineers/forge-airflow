@@ -4,11 +4,11 @@ import pandas as pd
 
 
 def transform_data_to_typed_dataframe(
-    raw_data: list[dict[str, Any]],
+    df: pd.DataFrame,
     source_config: dict[str, Any],
 ) -> tuple[pd.DataFrame, dict[str, str]]:
     """Validate, type, and deduplicate records before Parquet export."""
-    df = pd.DataFrame(raw_data)
+    
     # Keep a logical schema map for consistent Parquet dtypes downstream.
     semantic_types: dict[str, str] = {}
 

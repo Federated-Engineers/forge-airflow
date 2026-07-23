@@ -2,6 +2,8 @@ import json
 import logging
 
 import gspread
+import pandas as pd
+
 from google.oauth2.service_account import Credentials
 
 from plugins.aws import get_ssm_parameter
@@ -31,3 +33,28 @@ def authenticate_airflow(
 
     logger.info("Google Sheets authentication successful")
     return gspread.authorize(credentials)
+
+def get_google_sheets_data(
+    gsheet_id: str,
+    ssm_path: str = GOOGLE_CREDS_SSM_PATH,
+    sheet_name: str | None = None,
+) -> pd.DataFrame:
+    """
+    Open a Google Sheet by its ID and return its contents as a raw DataFrame.
+    """
+    if not gsheet_id:
+        raise ValueError("gsheet_id is required")
+
+    # Authenticate with Google Sheets using credentials stored in AWS SSM
+    auth_output = authenticate_airflow(ssm_path)
+    workbook = auth_output.open_by_key(gsheet_id)
+
+    if sheet_name:
+        worksheet = workbook.worksheet(sheet_name)
+    else:
+        worksheet = workbook.sheet1
+    records = worksheet.get_all_records()
+
+    df = pd.DataFrame(records)
+    logger.info("Fetched %d rows from sheet ID '%s'", len(df), gsheet_id)
+    return df

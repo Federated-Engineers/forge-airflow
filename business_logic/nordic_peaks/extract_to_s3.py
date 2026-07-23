@@ -4,42 +4,16 @@ from typing import Any
 
 import boto3
 import pandas as pd
-
-from plugins.gspread_auth import authenticate_airflow
+import awswrangler as wr
 
 logger = logging.getLogger(__name__)
+wr.engine.set("python")
 
 GOOGLE_CREDS_SSM_PATH = "/production/google-service-account/credentials"
 
 
-def get_google_sheets_data(
-    gsheet_id: str,
-    ssm_path: str = GOOGLE_CREDS_SSM_PATH,
-    sheet_name: str | None = None,
-) -> pd.DataFrame:
-    """
-    Open a Google Sheet by its ID and return its contents as a raw DataFrame.
-    """
-    if not gsheet_id:
-        raise ValueError("gsheet_id is required")
-
-    # Authenticate with Google Sheets using credentials stored in AWS SSM
-    auth_output = authenticate_airflow(ssm_path)
-    workbook = auth_output.open_by_key(gsheet_id)
-
-    if sheet_name:
-        worksheet = workbook.worksheet(sheet_name)
-    else:
-        worksheet = workbook.sheet1
-    records = worksheet.get_all_records()
-
-    df = pd.DataFrame(records)
-    logger.info("Fetched %d rows from sheet ID '%s'", len(df), gsheet_id)
-    return df
-
-
 def write_raw_json_to_s3(
-    records: list[dict[str, Any]],
+    records: pd.DataFrame,
     bucket: str,
     key: str,
 ) -> str:
@@ -55,14 +29,14 @@ def write_raw_json_to_s3(
         )
         if error_code not in {"404", "NoSuchKey", "NotFound"}:
             raise
-
-    s3.put_object(
-        Bucket=bucket,
-        Key=key,
-        Body=json.dumps(records, ensure_ascii=False).encode("utf-8"),
-        ContentType="application/json",
+    uri = f"s3://{bucket}/{key}"
+    wr.s3.to_csv(
+        df=records,
+        path=uri,
+        index=False,
+        encoding="utf-8"
     )
-    return f"s3://{bucket}/{key}"
+    return uri
 
 
 def validate_metadata(metadata: list[dict[str, Any]]) -> list[dict[str, Any]]:

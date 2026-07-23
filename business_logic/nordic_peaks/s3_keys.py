@@ -9,7 +9,7 @@ def build_landing_key(source: str, run_dt: Any) -> str:
     hhmm = run_dt.strftime("%H%M")
     return (
         f"landing_zone/source={source}/year={year}/month={month}/day={day}/"
-        f"{source}_{hhmm}Z.json"
+        f"{source}_{hhmm}Z.csv"
     )
 
 

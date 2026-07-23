@@ -3,8 +3,8 @@ from typing import Any
 
 from airflow.sdk import Variable, dag, get_current_context, task
 
-from business_logic.nordic_peaks.extract_to_s3 import (get_google_sheets_data,
-                                                       validate_metadata,
+from plugins.gspread_auth import get_google_sheets_data
+from business_logic.nordic_peaks.extract_to_s3 import (validate_metadata,
                                                        write_raw_json_to_s3)
 from business_logic.nordic_peaks.load_processed import write_processed_parquet
 from business_logic.nordic_peaks.read_raw_data import read_raw_data_from_s3
@@ -50,12 +50,9 @@ def start_nordic_peaks_pipeline():
             sheet_name=worksheet_name,
         )
 
-        # Convert dataframe to row-wise dictionaries for JSON snapshot writes.
-        records = dataframe.to_dict(orient="records")
-
         landing_key = build_landing_key(source=source, run_dt=run_datetime)
         landing_uri = write_raw_json_to_s3(
-            records=records,
+            records=dataframe,
             bucket=lake_bucket,
             key=landing_key,
         )
@@ -63,7 +60,6 @@ def start_nordic_peaks_pipeline():
         return {
             "source_config": source_config,
             "source": source,
-            "row_count": len(records),
             "landing_uri": landing_uri,
             "year": run_datetime.strftime("%Y"),
             "month": run_datetime.strftime("%m"),
@@ -113,26 +109,15 @@ def start_nordic_peaks_pipeline():
             ],
         }
 
-    @task(task_id="log_result")
-    def log_result(result: dict[str, Any]) -> None:
-        print(
-            "Google Sheets medallion pipeline complete: "
-            f"source={result['source']}, "
-            f"rows={result['row_count']}, "
-            f"landing={result['landing_uri']}, "
-            f"processed={result['processed_uri']}, "
-            f"partition_date_column={result['partition_date_column']}"
-        )
 
     sources = load_and_validate_sources()
     # Dynamic mapping creates one task instance per source config.
     landing_snapshots = extract_source_to_aws_landing_zone.expand(
         source_config=sources
     )
-    processed_results = transform_raw_to_processed_zone.expand(
+    transform_raw_to_processed_zone.expand(
         raw_payload=landing_snapshots
     )
-    log_result.expand(result=processed_results)
 
 
 dag = start_nordic_peaks_pipeline()
