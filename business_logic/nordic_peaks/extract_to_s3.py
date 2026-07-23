@@ -11,12 +11,12 @@ wr.engine.set("python")
 GOOGLE_CREDS_SSM_PATH = "/production/google-service-account/credentials"
 
 
-def write_raw_json_to_s3(
+def write_raw_to_s3(
     records: pd.DataFrame,
     bucket: str,
     key: str,
 ) -> str:
-    """Write a JSON snapshot once; keep existing landing object unchanged."""
+    """Writes the raw csv to s3 while keeping existing landing object unchanged."""
     s3 = boto3.client("s3")
 
     try:
@@ -39,6 +39,8 @@ def write_raw_json_to_s3(
 
 
 def validate_metadata(metadata: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """ Validate Google Sheets source metadata. Confirms the input is a non‑empty list of dictionaries and that each dictionary includes all required fields."""
+
     if not isinstance(metadata, list) or not metadata:
         raise ValueError("GSHEETS_SOURCES must be a non-empty JSON array")
 
