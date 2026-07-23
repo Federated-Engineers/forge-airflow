@@ -16,7 +16,10 @@ def write_raw_to_s3(
     bucket: str,
     key: str,
 ) -> str:
-    """Writes the raw csv to s3 while keeping existing landing object unchanged."""
+    """Write the raw CSV to S3.
+
+    Keeps the existing landing object unchanged if it already exists.
+    """
     s3 = boto3.client("s3")
 
     try:
@@ -39,7 +42,11 @@ def write_raw_to_s3(
 
 
 def validate_metadata(metadata: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    """ Validate Google Sheets source metadata. Confirms the input is a non‑empty list of dictionaries and that each dictionary includes all required fields."""
+    """Validate Google Sheets source metadata.
+
+    Confirms the input is a non-empty list of dictionaries and that
+    each dictionary includes all required fields.
+    """
 
     if not isinstance(metadata, list) or not metadata:
         raise ValueError("GSHEETS_SOURCES must be a non-empty JSON array")
