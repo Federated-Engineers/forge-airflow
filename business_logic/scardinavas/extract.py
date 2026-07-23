@@ -21,7 +21,7 @@ def gdrive_extract():
     return dataframes
 
 
-data = gdrive_extract()
+# data = gdrive_extract()
 
 
 def load_to_s3(dataframes, logical_date):
