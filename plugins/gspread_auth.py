@@ -3,7 +3,6 @@ import logging
 
 import gspread
 import pandas as pd
-
 from google.oauth2.service_account import Credentials
 
 from plugins.aws import get_ssm_parameter
@@ -33,6 +32,7 @@ def authenticate_airflow(
 
     logger.info("Google Sheets authentication successful")
     return gspread.authorize(credentials)
+
 
 def get_google_sheets_data(
     gsheet_id: str,

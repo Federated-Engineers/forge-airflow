@@ -1,10 +1,9 @@
-import json
 import logging
 from typing import Any
 
+import awswrangler as wr
 import boto3
 import pandas as pd
-import awswrangler as wr
 
 logger = logging.getLogger(__name__)
 wr.engine.set("python")

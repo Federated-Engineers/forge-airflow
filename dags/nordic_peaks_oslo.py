@@ -3,7 +3,6 @@ from typing import Any
 
 from airflow.sdk import Variable, dag, get_current_context, task
 
-from plugins.gspread_auth import get_google_sheets_data
 from business_logic.nordic_peaks.extract_to_s3 import (validate_metadata,
                                                        write_raw_json_to_s3)
 from business_logic.nordic_peaks.load_processed import write_processed_parquet
@@ -12,6 +11,7 @@ from business_logic.nordic_peaks.s3_keys import (build_landing_key,
                                                  build_processed_key)
 from business_logic.nordic_peaks.transform import \
     transform_data_to_typed_dataframe
+from plugins.gspread_auth import get_google_sheets_data
 
 DAG_ID = "NordicPeaks_GoogleSheets_Pipeline"
 
@@ -108,7 +108,6 @@ def start_nordic_peaks_pipeline():
                 "partition_date_column"
             ],
         }
-
 
     sources = load_and_validate_sources()
     # Dynamic mapping creates one task instance per source config.

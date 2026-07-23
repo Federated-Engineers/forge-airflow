@@ -3,6 +3,7 @@ import pandas as pd
 
 wr.engine.set("python")
 
+
 def write_processed_parquet(
     dataframe: pd.DataFrame,
     bucket: str,
