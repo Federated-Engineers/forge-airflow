@@ -13,6 +13,7 @@ from business_logic.mave_aqua.transform import (clean_harvest_data,
 _ = bypass_ray
 # Ensure that awswrangler uses the correct
 # engine for reading/writing Parquet files
+wr.config.ray_enabled = False
 wr.config.engine = "python"
 
 start_date = pendulum.datetime(
