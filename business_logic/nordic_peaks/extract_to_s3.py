@@ -1,44 +1,23 @@
-import logging
 from typing import Any
 
-import awswrangler as wr
-import boto3
 import pandas as pd
 
-logger = logging.getLogger(__name__)
-wr.engine.set("python")
-
-GOOGLE_CREDS_SSM_PATH = "/production/google-service-account/credentials"
+from business_logic.nordic_peaks.s3_keys import build_landing_folders
+from plugins.AWS.aws_wrangler.S3.wrangler_write import write_csv_data
 
 
 def write_raw_to_s3(
     records: pd.DataFrame,
     bucket: str,
-    key: str,
+    run_datetime: Any,
+    gsheet_source: str,
 ) -> str:
-    """Write the raw CSV to S3.
-
-    Keeps the existing landing object unchanged if it already exists.
-    """
-    s3 = boto3.client("s3")
-
-    try:
-        s3.head_object(Bucket=bucket, Key=key)
-        return f"s3://{bucket}/{key}"
-    except s3.exceptions.ClientError as exc:
-        error_code = exc.response.get("Error", {}).get(
-            "Code", ""
-        )
-        if error_code not in {"404", "NoSuchKey", "NotFound"}:
-            raise
-    uri = f"s3://{bucket}/{key}"
-    wr.s3.to_csv(
-        df=records,
-        path=uri,
-        index=False,
-        encoding="utf-8"
-    )
-    return uri
+    """Write the raw CSV to S3."""
+    landing_key = build_landing_folders(source=gsheet_source,
+                                        run_dt=run_datetime)
+    landing_zone_path = f"s3://{bucket}/{landing_key}"
+    write_csv_data(df=records, bucket=bucket, prefix=landing_key)
+    return landing_zone_path
 
 
 def validate_metadata(metadata: list[dict[str, Any]]) -> list[dict[str, Any]]:

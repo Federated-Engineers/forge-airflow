@@ -1,17 +1,18 @@
 import awswrangler as wr
 import pandas as pd
 
+from plugins.AWS.aws_wrangler.S3.wrangler_write import write_parquet_data
+
 wr.engine.set("python")
 
 
-def write_processed_parquet(
+def load_data(
     dataframe: pd.DataFrame,
     bucket: str,
-    key: str,
     semantic_types: dict[str, str],
     source: str,
     partition_date_column: str,
-) -> str:
+) -> None:
     """Write a dataset partitioned by source and business-date year/month."""
     if partition_date_column not in dataframe.columns:
         raise ValueError(
@@ -37,14 +38,13 @@ def write_processed_parquet(
     parquet_dtypes["year"] = "string"
     parquet_dtypes["month"] = "string"
 
-    path = f"s3://{bucket}/{key}"
-    wr.s3.to_parquet(
+    write_parquet_data(
         df=dataframe,
-        path=path,
+        bucket=bucket,
+        prefix="processed_zone/",
         dataset=True,
         partition_cols=["source", "year", "month"],
         mode="overwrite_partitions",
         index=False,
         dtype=parquet_dtypes,
     )
-    return path

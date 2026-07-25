@@ -2,15 +2,15 @@
 
 Usage:
 - Pass a pandas DataFrame and a bucket name.
-- Optionally pass key to override the default object name.
+- Optionally pass prefix to override the default object name.
 - Pass any awswrangler writer options through params.
 
 Examples:
-- write_parquet_data(df, "my-bucket", key="curated/data.parquet")
+- write_parquet_data(df, "my-bucket", prefix="curated/data.parquet")
 - write_parquet_data(
             df,
             "my-bucket",
-            key="curated/orders",
+            prefix="curated/orders",
             dataset=True,
             partition_cols=["country", "year"],
             mode="overwrite_partitions",
@@ -33,7 +33,7 @@ wr.engine.set("python")
 
 def write_csv_data(df: pd.DataFrame, bucket: str, **params) -> None:
     """Write CSV data to S3."""
-    key = params.pop("key", "data.csv")
+    key = params.pop("prefix", "data.csv")
     path = f"s3://{bucket}/{key}"
     defaults = {"index": False, "encoding": "utf-8"}
     defaults.update(params)
@@ -42,7 +42,7 @@ def write_csv_data(df: pd.DataFrame, bucket: str, **params) -> None:
 
 def write_parquet_data(df: pd.DataFrame, bucket: str, **params) -> None:
     """Write Parquet data to S3."""
-    key = params.pop("key", "data.parquet")
+    key = params.pop("prefix", "data.parquet")
     path = f"s3://{bucket}/{key}"
     defaults = {"index": False}
     defaults.update(params)
@@ -51,7 +51,7 @@ def write_parquet_data(df: pd.DataFrame, bucket: str, **params) -> None:
 
 def write_json_data(df: pd.DataFrame, bucket: str, **params) -> None:
     """Write JSON data to S3."""
-    key = params.pop("key", "data.json")
+    key = params.pop("prefix", "data.json")
     path = f"s3://{bucket}/{key}"
     defaults = {"orient": "records", "lines": True, }
     defaults.update(params)
@@ -60,7 +60,7 @@ def write_json_data(df: pd.DataFrame, bucket: str, **params) -> None:
 
 def write_excel_data(df: pd.DataFrame, bucket: str, **params) -> None:
     """Write Excel data to S3."""
-    key = params.pop("key", "data.xlsx")
+    key = params.pop("prefix", "data.xlsx")
     path = f"s3://{bucket}/{key}"
     defaults = {"index": False}
     defaults.update(params)
