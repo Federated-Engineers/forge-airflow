@@ -58,7 +58,8 @@ with DAG(
     @task
     def transform_harvest_data(ds=None):
         raw_s3_path = (
-            f"s3://{s3_bucket}/raw_files/{ds}/" "harvest_lifecycle_record.parquet"
+            f"s3://{s3_bucket}/raw_files/{ds}/"
+            "harvest_lifecycle_record.parquet"
         )
         import awswrangler as wr
 
@@ -72,7 +73,8 @@ with DAG(
     @task
     def transform_lagoon_data(ds=None):
         raw_s3_path = (
-            f"s3://{s3_bucket}/raw_files/{ds}/" "lagoon_environmental_log.parquet"
+            f"s3://{s3_bucket}/raw_files/{ds}/"
+            "lagoon_environmental_log.parquet"
         )
         import awswrangler as wr
 
@@ -85,7 +87,9 @@ with DAG(
         return cleaned_lagoon_df
 
     @task
-    def move_cleaned_harvest_and_register_to_athena(cleaned_harvest_df, ds=None):
+    def move_cleaned_harvest_and_register_to_athena(
+        cleaned_harvest_df, ds=None
+    ):
         move_file_and_register_athena(
             df=cleaned_harvest_df,
             key=f"cleaned_and_partitioned/harvest_lifecycle_record/{ds}/",
@@ -96,7 +100,9 @@ with DAG(
         )
 
     @task
-    def move_cleaned_lagoon_and_register_to_athena(cleaned_lagoon_df, ds=None):
+    def move_cleaned_lagoon_and_register_to_athena(
+        cleaned_lagoon_df, ds=None
+    ):
         move_file_and_register_athena(
             df=cleaned_lagoon_df,
             key=f"cleaned_and_partitioned/lagoon_environmental_log/{ds}/",
