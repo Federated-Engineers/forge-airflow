@@ -8,7 +8,8 @@ from airflow.models import Variable
 from airflow.providers.amazon.aws.transfers.sql_to_s3 import SqlToS3Operator
 
 from business_logic.mave_aqua.load_data_s3 import move_file_and_register_athena
-from business_logic.mave_aqua.transform import clean_harvest_data, clean_lagoon_data
+from business_logic.mave_aqua.transform import (clean_harvest_data,
+                                                clean_lagoon_data)
 
 _ = bypass_ray
 # Ensure that awswrangler uses the correct
