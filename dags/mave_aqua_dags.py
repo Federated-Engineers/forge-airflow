@@ -1,4 +1,4 @@
-import awswrangler as wr
+import os
 import bypass_ray
 import pendulum
 from airflow import DAG
@@ -13,8 +13,7 @@ from business_logic.mave_aqua.transform import (clean_harvest_data,
 _ = bypass_ray
 # Ensure that awswrangler uses the correct
 # engine for reading/writing Parquet files
-wr.config.ray_enabled = False
-wr.config.engine = "python"
+os.environ["AWSWRANGLER_RAY_ENABLED"] = "false"
 
 start_date = pendulum.datetime(
     2026, 7, 13, tz="Europe/Berlin"
@@ -65,6 +64,7 @@ with DAG(
         )
         import awswrangler as wr
 
+        wr.config.ray_enabled = False
         wr.config.engine = "python"
         raw_harvest_data = wr.s3.read_parquet(raw_s3_path)
         cleaned_harvest_df = clean_harvest_data(raw_harvest_data)
@@ -78,6 +78,7 @@ with DAG(
             "lagoon_environmental_log.parquet"
         )
         import awswrangler as wr
+        wr.config.ray_enabled = False
         wr.config.engine = "python"
 
         raw_lagoon_data = wr.s3.read_parquet(raw_s3_path)
