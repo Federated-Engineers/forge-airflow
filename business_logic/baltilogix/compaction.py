@@ -31,8 +31,9 @@ def process_and_count_objects(keys: List) -> Tuple[pd.DataFrame, int]:
 
     for key in keys:
         log.info(f"Processing {key}")
+        parsed_key = "/".join(key.replace("s3://", "").split("/")[1:])
 
-        content = s3_hook.read_key(key=key, bucket_name=src_bucket)
+        content = s3_hook.read_key(key=parsed_key, bucket_name=src_bucket)
         content = json.loads(content)
         df = pd.json_normalize(content)
         df["timestamp"] = pd.to_datetime(df["timestamp"])
