@@ -33,7 +33,6 @@ def process_and_count_objects(keys: List) -> Tuple[pd.DataFrame, int]:
         log.info(f"Processing {key}")
         parsed_key = "/".join(key.replace("s3://", "").split("/")[1:])
 
-
         content = s3_hook.read_key(key=parsed_key, bucket_name=src_bucket)
         content = json.loads(content)
         df = pd.json_normalize(content)
