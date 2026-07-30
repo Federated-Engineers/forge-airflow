@@ -65,7 +65,7 @@ def run_compaction() -> Dict:
     src_bucket, src_prefix, dest_bucket = (
         config.get("BALTILOGIX_SOURCE"),
         config.get("BALTILOGIX_PATH"),
-        config.get("BALTILOGIX_BUCKET")
+        config.get("BALTILOGIX_DEST")
     )
     files = list_objects(src_bucket, src_prefix)
     data, source_count = process_and_count_objects(files)
