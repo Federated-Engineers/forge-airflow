@@ -40,20 +40,31 @@ def liffey_pipeline():
         df = extract_googlesheets_data(pipeline_metadata)
         return df
 
-    # @task(task_id="extract_supabase_data")
-    # def extract_supabase_data() -> Any:
-    #     df = extract_supasbase_data()
-    #     return df
+    @task(task_id="extract_supabase_data")
+    def extract_supabase_data(pipeline_metadata: dict[str, Any]) -> Any:
+        df = extract_supasbase_data(pipeline_metadata)
+        return df
 
-    # @task(task_id="load_raw_data")
-    # def load_raw_data(gsheets_data, supabase_data) -> Any:
-    #     pass
+    @task(task_id="load_raw_data")
+    def load_raw_data(pipeline_metadata, gsheets_data, supabase_data) -> Any:
+        from business_logic.liffey_luxury_linens.load import load_raw_to_s3
+        loaded_data = load_raw_to_s3(
+            pipeline_metadata, gsheets_data, supabase_data)
+        return loaded_data
+
+    @task(task_id="write_to_curated_zone")
+    def write_to_curated_zone_task(pipeline_metadata, loaded_data) -> None:
+        from business_logic.liffey_luxury_linens.curate_data import write_to_curated_zone
+
+        bucket_name = pipeline_metadata["bucket_name"]
+        run_datetime = pipeline_metadata["run_datetime"]
+        write_to_curated_zone(loaded_data, bucket_name, run_datetime)
 
     pipeline_metadata = initiate_pipline()
     gsheets_data = extract_google_sheets(pipeline_metadata)
-    # supabase_data = extract_supabase_data(pipeline_metadata)
-    # loaded_data = load_raw_data(gsheets_data, supabase_data)
-    print("pipeline_metadata", pipeline_metadata)
+    supabase_data = extract_supabase_data(pipeline_metadata)
+    loaded_data = load_raw_data(pipeline_metadata, gsheets_data, supabase_data)
+    write_to_curated_zone_task(pipeline_metadata, loaded_data)
 
 
 dag = liffey_pipeline()
