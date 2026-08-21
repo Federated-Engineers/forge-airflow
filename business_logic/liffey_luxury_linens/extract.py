@@ -39,7 +39,7 @@ def extract_supasbase_data(pipeline_metadata: dict[str, Any]) -> pd.DataFrame:
         print("Successfully connected to Supabase Postgres DB")
 
         query = (
-            "SELECT COUNT(*) "
+            "SELECT * "
             "FROM liffey_luxury.liffey_luxury_order_transactions;"
         )
 
