@@ -1,7 +1,9 @@
 from plugins.AWS.aws_wrangler.S3.wrangler_write import write_csv_data
 
 
-def load_raw_to_s3(pipeline_metadata, gsheets_data, supabase_data) -> dict[str, str]:
+def load_raw_to_s3(
+    pipeline_metadata, gsheets_data, supabase_data
+) -> dict[str, str]:
     google_sheets_path = load_google_sheets_data_to_s3(
         pipeline_metadata, gsheets_data)
     supabase_path = load_supabase_data_to_s3(pipeline_metadata, supabase_data)
@@ -26,7 +28,9 @@ def load_google_sheets_data_to_s3(pipeline_metadata, gsheets_data) -> str:
     write_csv_data(df=gsheets_data, bucket=bucket_name, prefix=landing_key)
 
     print(
-        f"Google Sheets data successfully loaded to S3 at: {landing_zone_path}")
+        "Google Sheets data successfully loaded to S3 at: "
+        f"{landing_zone_path}"
+    )
     return landing_zone_path
 
 

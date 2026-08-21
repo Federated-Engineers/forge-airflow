@@ -1,14 +1,18 @@
 from typing import Any
+
 import pandas as pd
-from plugins.gspread_auth import get_google_sheets_data
 import psycopg2
+
+from plugins.gspread_auth import get_google_sheets_data
 
 
 def extract_googlesheets_data(
     pipeline_metadata: dict[str, Any]
 ) -> pd.DataFrame:
     google_metadata = pipeline_metadata.get("google_sheets_metadata")
-    google_credentials_ssm_path = google_metadata["google_credentials_ssm_path"]
+    google_credentials_ssm_path = google_metadata[
+        "google_credentials_ssm_path"
+    ]
     google_sheet_id = google_metadata["google_sheet_id"]
     sheet_name = google_metadata["sheet_name"]
 

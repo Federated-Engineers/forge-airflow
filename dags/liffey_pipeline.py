@@ -54,7 +54,8 @@ def liffey_pipeline():
 
     @task(task_id="write_to_curated_zone")
     def write_to_curated_zone_task(pipeline_metadata, loaded_data) -> None:
-        from business_logic.liffey_luxury_linens.curate_data import write_to_curated_zone
+        from business_logic.liffey_luxury_linens.curate_data import \
+            write_to_curated_zone
 
         bucket_name = pipeline_metadata["bucket_name"]
         run_datetime = pipeline_metadata["run_datetime"]
