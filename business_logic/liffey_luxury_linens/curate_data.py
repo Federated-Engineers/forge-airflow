@@ -3,6 +3,8 @@ import datetime
 
 import pandas as pd
 
+from business_logic.liffey_luxury_linens.transform import \
+    deduplicate_crm_first_touch
 from plugins.AWS.aws_wrangler.S3.wrangler_read import read_csv_data
 from plugins.AWS.aws_wrangler.S3.wrangler_write import write_parquet_data
 
@@ -16,6 +18,10 @@ def write_to_curated_zone(
 
     for source, landing_zone_path in loaded_data.items():
         df = get_raw_data(landing_zone_path)
+
+        if source == "crm_data":
+            df = deduplicate_crm_first_touch(df)
+
         df["run_date"] = run_date
 
         write_parquet_data(
