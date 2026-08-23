@@ -9,9 +9,6 @@ from business_logic.HDG.load_s3_athena import (load_raw_data_to_s3,
                                                move_parquet_to_cleaned_folder)
 from business_logic.HDG.transform_dfs import transform_dfs
 
-# ---------------------------------------------------------
-# Configuration
-# ---------------------------------------------------------
 
 start_date = pendulum.datetime(
     2026,
@@ -40,9 +37,7 @@ default_args = {
 }
 
 
-# ---------------------------------------------------------
-# DAG
-# ---------------------------------------------------------
+
 
 with DAG(
     dag_id="hdg-dags",
@@ -65,9 +60,7 @@ with DAG(
     def get_rhone_data_task():
         return extract_google_sheet(sheet_id=rhones_id)
 
-    # =====================================================
-    # 2. LOAD RAW DATA TO S3
-    # =====================================================
+
 
     @task(task_id="raw_data_to_s3_lancy")
     def raw_data_to_s3_lancy_task(df):
@@ -83,9 +76,7 @@ with DAG(
             key="rhone.parquet",
         )
 
-    # =====================================================
-    # 3. TRANSFORM
-    # =====================================================
+
 
     @task(
         task_id="transform_data",
@@ -100,9 +91,7 @@ with DAG(
             rhone_parquet,
         )
 
-    # =====================================================
-    # 4. LOAD CLEANED DATA
-    # =====================================================
+
 
     @task(task_id="move_to_cleaned_folder_lancy")
     def move_to_cleaned_folder_lancy_task(df):
@@ -124,33 +113,23 @@ with DAG(
             partition_cols=["month"],
         )
 
-    # =====================================================
-    # 5. EXTRACT
-    # =====================================================
+
 
     lancy_df = get_lancy_data_task()
     rhone_df = get_rhone_data_task()
 
-    # =====================================================
-    # 6. RAW S3
-    # =====================================================
+ 
 
     raw_lancy = raw_data_to_s3_lancy_task(lancy_df)
 
     raw_rhone = raw_data_to_s3_rhone_task(rhone_df)
 
-    # =====================================================
-    # 7. TRANSFORM
-    # =====================================================
 
     transformed = transform_data_task(
         raw_lancy,
         raw_rhone,
     )
 
-    # =====================================================
-    # 8. CLEANED
-    # =====================================================
 
     move_to_cleaned_folder_lancy_task(transformed["lancy"])
 

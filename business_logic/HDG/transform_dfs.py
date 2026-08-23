@@ -10,15 +10,15 @@ def transform_dfs(lancy_parquet, rhone_parquet):
     rhone_df = wr.s3.read_parquet(path=rhone_parquet)
 
     # DEBUG
-    print("====================================")
+  
     print("LANCY S3 PATH:")
     print(lancy_parquet)
 
-    print("====================================")
+   
     print("RHONE S3 PATH:")
     print(rhone_parquet)
 
-    print("====================================")
+  
 
     # Lancy transformations
     lancy_df["Ship_Date"] = pd.to_datetime(lancy_df["Ship_Date"],
