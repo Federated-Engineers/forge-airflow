@@ -45,9 +45,6 @@ with DAG(
     tags=["hdg"],
 ) as dag:
 
-    # =====================================================
-    # 1. EXTRACT
-    # =====================================================
 
     @task(task_id="get_lancy_data")
     def get_lancy_data_task():
