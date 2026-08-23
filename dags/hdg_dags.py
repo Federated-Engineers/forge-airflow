@@ -45,7 +45,6 @@ with DAG(
     tags=["hdg"],
 ) as dag:
 
-
     @task(task_id="get_lancy_data")
     def get_lancy_data_task():
         return extract_google_sheet(sheet_id=lancy_id)
