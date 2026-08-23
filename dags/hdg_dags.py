@@ -9,7 +9,6 @@ from business_logic.HDG.load_s3_athena import (load_raw_data_to_s3,
                                                move_parquet_to_cleaned_folder)
 from business_logic.HDG.transform_dfs import transform_dfs
 
-
 start_date = pendulum.datetime(
     2026,
     8,
