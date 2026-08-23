@@ -36,8 +36,6 @@ default_args = {
 }
 
 
-
-
 with DAG(
     dag_id="hdg-dags",
     default_args=default_args,
@@ -59,8 +57,6 @@ with DAG(
     def get_rhone_data_task():
         return extract_google_sheet(sheet_id=rhones_id)
 
-
-
     @task(task_id="raw_data_to_s3_lancy")
     def raw_data_to_s3_lancy_task(df):
         return load_raw_data_to_s3(
@@ -75,8 +71,6 @@ with DAG(
             key="rhone.parquet",
         )
 
-
-
     @task(
         task_id="transform_data",
         multiple_outputs=True,
@@ -89,8 +83,6 @@ with DAG(
             lancy_parquet,
             rhone_parquet,
         )
-
-
 
     @task(task_id="move_to_cleaned_folder_lancy")
     def move_to_cleaned_folder_lancy_task(df):
@@ -112,23 +104,17 @@ with DAG(
             partition_cols=["month"],
         )
 
-
-
     lancy_df = get_lancy_data_task()
     rhone_df = get_rhone_data_task()
-
- 
 
     raw_lancy = raw_data_to_s3_lancy_task(lancy_df)
 
     raw_rhone = raw_data_to_s3_rhone_task(rhone_df)
 
-
     transformed = transform_data_task(
         raw_lancy,
         raw_rhone,
     )
-
 
     move_to_cleaned_folder_lancy_task(transformed["lancy"])
 
