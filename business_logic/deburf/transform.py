@@ -1,4 +1,5 @@
 import boto3
+
 from plugins.s3_helper import (read_latest_data_from_s3,
                                write_dataframe_to_s3_glue)
 
