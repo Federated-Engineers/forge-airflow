@@ -7,7 +7,7 @@ from business_logic.deburf.tasks import run_migration, transform_data
 
 default_args = {
     "owner": "federated_engineers",
-    "retries": 0,
+    "retries": 2,
     "retry_delay": timedelta(minutes=1),
 }
 
