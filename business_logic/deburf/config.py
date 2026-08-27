@@ -1,4 +1,4 @@
-bucket_name = "federated-production-forge-data-engineers-deburf-data-test"
+bucket_name = "federated-production-forge-data-engineers-deburf-data-lake"
 
 glue_db = "deburf_db"
 
