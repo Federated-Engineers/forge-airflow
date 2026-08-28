@@ -7,4 +7,4 @@ paths = {
     "shipments": "raw/public/logistics_shipments",
 }
 
-replication_task_id = "deburf-dms-replication-task"
+replication_task_id = "dms-replication-instance-tf"
