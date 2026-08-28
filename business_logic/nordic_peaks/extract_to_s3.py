@@ -1,9 +1,9 @@
 from typing import Any
 
 import pandas as pd
-from plugins.AWS.aws_wrangler.S3.wrangler_write import write_csv_data
 
 from business_logic.nordic_peaks.s3_keys import build_landing_folders
+from plugins.AWS.aws_wrangler.S3.wrangler_write import write_csv_data
 
 
 def write_raw_to_s3(

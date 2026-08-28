@@ -2,10 +2,10 @@ import logging
 
 import awswrangler as wr
 import pandas as pd
-from plugins.s3_helper import write_dataframe_to_s3_glue
 
 from business_logic.scardinavas.config import (bucket_name, date_columns,
                                                glue_database)
+from plugins.s3_helper import write_dataframe_to_s3_glue
 
 logger = logging.getLogger(__name__)
 wr.engine.set("python")
