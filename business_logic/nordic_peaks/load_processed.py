@@ -1,6 +1,5 @@
 import awswrangler as wr
 import pandas as pd
-
 from plugins.AWS.aws_wrangler.S3.wrangler_write import write_parquet_data
 
 wr.engine.set("python")

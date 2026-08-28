@@ -4,7 +4,6 @@ from typing import Dict, List, Tuple
 import pandas as pd
 from airflow.models import Variable
 from airflow.providers.amazon.aws.hooks.s3 import S3Hook
-
 from plugins.aws import list_objects, write_partitions
 from plugins.logger import log
 

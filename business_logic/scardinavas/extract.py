@@ -1,9 +1,9 @@
 import logging
 
 import awswrangler as wr
+from plugins.gspread_auth import get_data
 
 from business_logic.scardinavas.config import bucket_name, gsheet_ids
-from plugins.gspread_auth import get_data
 
 logger = logging.getLogger(__name__)
 

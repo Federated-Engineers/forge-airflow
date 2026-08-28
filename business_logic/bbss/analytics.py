@@ -1,10 +1,11 @@
 import logging
 
-from business_logic.bbss.config import (ANALYTICS_PREFIX, BUCKET_NAME,
-                                        TRANSFORMED_PREFIX)
 from plugins.date_utils import get_partitioned_date
 from plugins.s3_helper import (read_latest_data_from_s3,
                                write_dataframe_to_s3_glue)
+
+from business_logic.bbss.config import (ANALYTICS_PREFIX, BUCKET_NAME,
+                                        TRANSFORMED_PREFIX)
 
 logger = logging.getLogger(__name__)
 
