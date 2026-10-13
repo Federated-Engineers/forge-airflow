@@ -10,7 +10,6 @@ from airflow.providers.common.sql.operators.sql import SQLExecuteQueryOperator
 from airflow.sdk import Variable, dag
 from pendulum import datetime, duration
 
-
 default_args = {
     "owner": "federated_engineers",
     "depends_on_past": False,
@@ -42,6 +41,7 @@ def achs_dag():
         RAW_DATA,
         SOURCE_FILE,
         FILE_ROW_NUMBER,
+        LOGICAL_LOAD_DATE,
         LOADED_AT_TIMESTAMP
     )
     FROM (
@@ -49,10 +49,23 @@ def achs_dag():
             $1,
             METADATA$FILENAME,
             METADATA$FILE_ROW_NUMBER,
+            '{ds}' AS DATE,
             CURRENT_TIMESTAMP()
         FROM @{database}.{schema}.{stage}/{entity}/{ds}/
     );
     """
+
+    ecs_networking_config: dict = {
+        "awsvpcConfiguration": {
+            "subnets": [
+                dag_variables["networking"]["subnet_id"],
+            ],
+            "securityGroups": [
+                dag_variables["networking"]["security_group_id"],
+            ],
+            "assignPublicIp": dag_variables["networking"]["assign_public_ip"]
+        }
+    }
 
     load_claims_to_landing = SQLExecuteQueryOperator(
         task_id="load_claims_to_landing",
@@ -123,13 +136,112 @@ def achs_dag():
             ds="{{ ds }}"
         )
     )
+
+    clean_claims = EcsRunTaskOperator(
+        task_id="clean_claims",
+        task_definition="dbt-core-task-definition",
+        cluster="dbt-core-cluster",
+        region="eu-central-1",
+        launch_type="FARGATE",
+        overrides={
+            "containerOverrides": [
+                {
+                    "name": "dbt-core",
+                    "command": [
+                        "run", "--select", "stg_claims",
+                        "--vars", '{"logical_load_date": "{{ ds }}"}'
+                    ]
+                }
+            ]
+        },
+        network_configuration=ecs_networking_config
     )
 
-    load_claims_to_landing
-    load_diagnoses_to_landing
-    load_encounters_to_landing
-    load_patients_to_landing
-    load_providers_to_landing
+    clean_providers = EcsRunTaskOperator(
+        task_id="clean_providers",
+        task_definition="dbt-core-task-definition",
+        cluster="dbt-core-cluster",
+        region="eu-central-1",
+        launch_type="FARGATE",
+        overrides={
+            "containerOverrides": [
+                {
+                    "name": "dbt-core",
+                    "command": [
+                        "run", "--select", "stg_providers",
+                        "--vars", '{"logical_load_date": "{{ ds }}"}'
+                    ]
+                }
+            ]
+        },
+        network_configuration=ecs_networking_config
+    )
+
+    clean_patients = EcsRunTaskOperator(
+        task_id="clean_patients",
+        task_definition="dbt-core-task-definition",
+        cluster="dbt-core-cluster",
+        region="eu-central-1",
+        launch_type="FARGATE",
+        overrides={
+            "containerOverrides": [
+                {
+                    "name": "dbt-core",
+                    "command": [
+                        "run", "--select", "stg_patients",
+                        "--vars", '{"logical_load_date": "{{ ds }}"}'
+                    ]
+                }
+            ]
+        },
+        network_configuration=ecs_networking_config
+    )
+
+    clean_diagnoses = EcsRunTaskOperator(
+        task_id="clean_diagnoses",
+        task_definition="dbt-core-task-definition",
+        cluster="dbt-core-cluster",
+        region="eu-central-1",
+        launch_type="FARGATE",
+        overrides={
+            "containerOverrides": [
+                {
+                    "name": "dbt-core",
+                    "command": [
+                        "run", "--select", "stg_diagnoses",
+                        "--vars", '{"logical_load_date": "{{ ds }}"}'
+                    ]
+                }
+            ]
+        },
+        network_configuration=ecs_networking_config
+    )
+
+    clean_encounters = EcsRunTaskOperator(
+        task_id="clean_encounters",
+        task_definition="dbt-core-task-definition",
+        cluster="dbt-core-cluster",
+        region="eu-central-1",
+        launch_type="FARGATE",
+        overrides={
+            "containerOverrides": [
+                {
+                    "name": "dbt-core",
+                    "command": [
+                        "run", "--select", "stg_encounters",
+                        "--vars", '{"logical_load_date": "{{ ds }}"}'
+                    ]
+                }
+            ]
+        },
+        network_configuration=ecs_networking_config
+    )
+
+    load_claims_to_landing >> clean_claims
+    load_diagnoses_to_landing >> clean_diagnoses
+    load_encounters_to_landing >> clean_encounters
+    load_patients_to_landing >> clean_patients
+    load_providers_to_landing >> clean_providers
 
 
 achs_dag()
