@@ -1,5 +1,7 @@
-import snowflake.connector
 import base64
+
+import snowflake.connector
+
 from plugins.aws import get_ssm_parameter
 
 
