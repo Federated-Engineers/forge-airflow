@@ -1,16 +1,14 @@
 from datetime import datetime, timedelta
 
 from airflow import DAG
-from airflow.providers.standard.operators.python import PythonOperator
 from airflow.providers.amazon.aws.operators.ecs import EcsRunTaskOperator
+from airflow.providers.standard.operators.python import PythonOperator
 
-from business_logic.angel_city_health.extract import (
-    copy_patients_data,
-    copy_providers_data,
-    copy_claims_data,
-    copy_diagnoses_data,
-    copy_encounters_data,
-)
+from business_logic.angel_city_health.extract import (copy_claims_data,
+                                                      copy_diagnoses_data,
+                                                      copy_encounters_data,
+                                                      copy_patients_data,
+                                                      copy_providers_data)
 
 DAG_ID = "Angel_City_Health_System_Pipeline"
 
