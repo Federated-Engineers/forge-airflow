@@ -2,6 +2,7 @@ from datetime import datetime, timedelta
 
 from airflow import DAG
 from airflow.providers.standard.operators.python import PythonOperator
+from airflow.providers.amazon.aws.operators.ecs import EcsRunTaskOperator
 
 from business_logic.angel_city_health.extract import (
     copy_patients_data,
@@ -56,5 +57,38 @@ with DAG(
         python_callable=copy_encounters_data,
     )
 
+    # run ECS task
+    run_dbt_transformations = EcsRunTaskOperator(
+        task_id="run_dbt_transformations",
+        cluster="achs-data-cluster",
+        task_definition="achs-dbt-task",
+        launch_type='FARGATE',
+        network_configuration={'awsvpcConfiguration': {
+            'subnets': [
+                'subnet-0451da8d315c36b25',
+                'subnet-0afd703726163a8b2',
+                'subnet-0c506f8f90c5bed3a',
+            ],
+            'securityGroups': ['sg-091589329c73d73d5'],
+            'assignPublicIp': 'ENABLED'
+        }},
+        overrides={
+            "containerOverrides": [
+                {
+                    "name": "dbt-container",
+                    "command": ["dbt", "build", "--profiles-dir", "."]
+                }
+            ]
+        },
+        awslogs_group='/ecs/achs-dbt',
+        awslogs_region='eu-central-1',
+        awslogs_stream_prefix="dbt",
+    )
+
     # # Define task dependencies
-    copy_patients_task >> copy_providers_task >> copy_claims_task >> copy_diagnoses_task >> copy_encounters_task
+    [copy_patients_task,
+     copy_providers_task,
+     copy_claims_task,
+     copy_diagnoses_task,
+     copy_encounters_task
+     ] >> run_dbt_transformations

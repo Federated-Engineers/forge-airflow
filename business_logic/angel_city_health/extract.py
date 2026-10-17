@@ -1,4 +1,6 @@
-from business_logic.angel_city_health.connect_snowflake import get_snowflake_connection
+from business_logic.angel_city_health.connect_snowflake import (
+    get_snowflake_connection,
+)
 
 
 def copy_patients_data():
