@@ -63,11 +63,11 @@ with DAG(
         launch_type='FARGATE',
         network_configuration={'awsvpcConfiguration': {
             'subnets': [
-                'subnet-0451da8d315c36b25',
-                'subnet-0afd703726163a8b2',
-                'subnet-0c506f8f90c5bed3a',
+                'subnet-0737ad770665b10e0',
+                'subnet-098298f12f873b1de',
+                'subnet-0dbc6bd9c895e291a',
             ],
-            'securityGroups': ['sg-091589329c73d73d5'],
+            'securityGroups': ['sg-0b65fc4de73b84f1a', 'sg-045d45c5be9b26ab9'],
             'assignPublicIp': 'ENABLED'
         }},
         overrides={
