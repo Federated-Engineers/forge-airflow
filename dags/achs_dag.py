@@ -2,7 +2,6 @@
 DAG for the Angel City Health System Pipeline.
 """
 
-import logging
 from typing import Any
 
 from airflow.providers.amazon.aws.operators.ecs import EcsRunTaskOperator
