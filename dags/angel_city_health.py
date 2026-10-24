@@ -67,7 +67,7 @@ with DAG(
                 'subnet-098298f12f873b1de',
                 'subnet-0dbc6bd9c895e291a',
             ],
-            'securityGroups': ['sg-0b65fc4de73b84f1a', 'sg-045d45c5be9b26ab9'],
+            'securityGroups': ['sg-0b65fc4de73b84f1a'],
             'assignPublicIp': 'ENABLED'
         }},
         overrides={
