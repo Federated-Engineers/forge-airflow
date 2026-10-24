@@ -66,6 +66,7 @@ with DAG(
                 'subnet-0737ad770665b10e0',
                 'subnet-098298f12f873b1de',
                 'subnet-0dbc6bd9c895e291a',
+                'subnet-06ad95ced1bdf6b0c'
             ],
             'securityGroups': ['sg-0b65fc4de73b84f1a'],
             'assignPublicIp': 'ENABLED'
@@ -83,7 +84,6 @@ with DAG(
         awslogs_stream_prefix="dbt",
     )
 
-    # # Define task dependencies
     [copy_patients_task,
      copy_providers_task,
      copy_claims_task,

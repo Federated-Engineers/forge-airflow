@@ -9,7 +9,6 @@ def get_snowflake_connection():
     ssm_path = "/snowflake/airflow/private-key"
     private_key = get_ssm_parameter(ssm_path)
 
-    # Remove PEM headers, footers, newlines, and trailing whitespace
     clean_b64 = (
         private_key.replace("-----BEGIN PRIVATE KEY-----", "")
         .replace("-----END PRIVATE KEY-----", "")
@@ -20,7 +19,7 @@ def get_snowflake_connection():
         .replace('"', "")
         .strip()
     )
-    # Decode into bytes before passing to the connector
+   
     private_key_bytes = base64.b64decode(clean_b64)
     conn = snowflake.connector.connect(
         user="AIRFLOW_USER",
