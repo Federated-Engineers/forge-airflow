@@ -1,10 +1,12 @@
 import logging
 from datetime import timedelta
+
 import pendulum
 from airflow import DAG
 from airflow.models import Variable
 from airflow.providers.amazon.aws.operators.ecs import EcsRunTaskOperator
 from airflow.providers.common.sql.operators.sql import SQLExecuteQueryOperator
+
 from dags.cocosurf.copy_into_raw import COPY_INTO_RAW
 
 logger = logging.getLogger(__name__)
