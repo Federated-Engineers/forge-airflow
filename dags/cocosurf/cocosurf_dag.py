@@ -20,7 +20,7 @@ default_args = {
 
 with DAG(
     dag_id="cocosurf_dbt_pipeline",
-    description="Ingest Cocosurf data into Snowflake and run dbt on ECS Fargate",
+    description="Ingest Cocosurf data into Snowflake",
     start_date=pendulum.datetime(2026, 5, 1),
     schedule=None,
     catchup=False,
