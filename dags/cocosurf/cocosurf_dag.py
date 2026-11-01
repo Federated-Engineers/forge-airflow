@@ -54,7 +54,7 @@ with DAG(
         task_definition="cocosurf-dbt",
         launch_type="FARGATE",
         platform_version="LATEST",
-        aws_conn_id="aws_default",
+        aws_conn_id=None,
         region="eu-central-1",
         network_configuration={
             "awsvpcConfiguration": network_config,
