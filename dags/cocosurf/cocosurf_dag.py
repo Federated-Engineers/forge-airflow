@@ -70,7 +70,6 @@ with DAG(
         },
         reattach=True,
         wait_for_completion=True,
-        deferrable=True,
     )
 
     ingest_s3_to_snowflake >> run_cocosurf_dbt
